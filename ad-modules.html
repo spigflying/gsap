@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AD MODULE LAB — GSAP 數位廣告模組</title>
+  <meta name="description" content="同一個廣告模組版型，六種 GSAP 進場效果：3D 翻入、折疊展開、翻頁、捲動視差、景深推進、遮罩橫掃。" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    :root {
+      --ink: #0E1116;
+      --panel: #161B22;
+      --panel-2: #1C232C;
+      --line: #00E0C6;
+      --signal: #FF5C38;
+      --grid: rgba(255, 255, 255, 0.05);
+      --grid-bold: rgba(255, 255, 255, 0.10);
+      --hi: #E8EDF2;
+      --lo: #8A95A3;
+      --hairline: rgba(255, 255, 255, 0.12);
+      --display: "Space Grotesk", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+      --tc: "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--ink);
+      color: var(--hi);
+      font-family: var(--tc);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(0, 224, 198, 0.06), transparent 45%),
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: auto, 34px 34px, 34px 34px;
+    }
+
+    ::selection {
+      background: var(--signal);
+      color: #fff;
+    }
+
+    a {
+      color: var(--line);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .backlink {
+      position: fixed;
+      left: 18px;
+      top: 16px;
+      z-index: 60;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .12em;
+      color: var(--lo);
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      padding: 8px 16px;
+      background: rgba(14, 17, 22, 0.7);
+      backdrop-filter: blur(6px);
+    }
+
+    .backlink:hover {
+      color: var(--line);
+      border-color: var(--line);
+      text-decoration: none;
+    }
+
+    /* progress bar top */
+    .topbar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 3px;
+      width: 100%;
+      z-index: 60;
+      background: var(--grid-bold);
+    }
+
+    .topbar i {
+      display: block;
+      height: 100%;
+      width: 100%;
+      transform-origin: left;
+      transform: scaleX(0);
+      background: linear-gradient(90deg, var(--line), var(--signal));
+    }
+
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* hero */
+    .intro {
+      min-height: 78vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .intro .kicker {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .34em;
+      text-transform: uppercase;
+      color: var(--line);
+      margin-bottom: 20px;
+    }
+
+    .intro h1 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: clamp(40px, 8vw, 104px);
+      line-height: .94;
+      letter-spacing: -.03em;
+    }
+
+    .intro h1 em {
+      font-style: normal;
+      color: var(--line);
+    }
+
+    .intro p {
+      max-width: 48ch;
+      color: var(--lo);
+      font-size: clamp(15px, 1.5vw, 18px);
+      margin-top: 24px;
+    }
+
+    .intro .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .intro .legend span {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      color: var(--lo);
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      padding: 6px 13px;
+    }
+
+    /* one ad module = one scroll stop */
+    .ad-stop {
+      min-height: 86vh;
+      display: flex;
+      align-items: center;
+      perspective: 1400px;
+      /* enables child 3D */
+      padding: 60px 0;
+    }
+
+    .ad {
+      position: relative;
+      width: 100%;
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--hairline);
+      border-radius: 18px;
+      padding: clamp(24px, 4vw, 44px);
+      transform-style: preserve-3d;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+    }
+
+    .ad::before {
+      /* corner accent */
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 60px;
+      height: 60px;
+      border-top: 2px solid var(--line);
+      border-left: 2px solid var(--line);
+      border-top-left-radius: 18px;
+      opacity: .6;
+    }
+
+    .ad__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--signal);
+      margin-bottom: 22px;
+    }
+
+    .ad__badge .no {
+      color: var(--lo);
+    }
+
+    .ad__badge::after {
+      content: "";
+      flex: 1;
+    }
+
+    .ad__title {
+      font-family: var(--tc);
+      font-weight: 700;
+      font-size: clamp(22px, 3.1vw, 34px);
+      line-height: 1.35;
+      letter-spacing: -.01em;
+      margin-bottom: 26px;
+    }
+
+    .ad__title .lead {
+      color: var(--line);
+    }
+
+    .ad__rows {
+      display: flex;
+      flex-direction: row;
+      gap: 14px;
+      transform-style: preserve-3d;
+    }
+
+    .ad__row {
+      flex: 1 1 0;
+      min-width: 0;
+      /* three equal columns, side by side */
+      position: relative;
+      overflow: hidden;
+      /* for mask/clip effects */
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--hairline);
+      border-top: 3px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 18px;
+      font-size: clamp(14px, 1.5vw, 17px);
+      color: var(--hi);
+    }
+
+    @media (max-width:640px) {
+      .ad__rows {
+        flex-direction: column;
+      }
+    }
+
+    .ad__row:nth-child(2) {
+      border-top-color: var(--signal);
+    }
+
+    .ad__row:nth-child(3) {
+      border-top-color: #E8EDF2;
+    }
+
+    .ad__row-i {
+      display: block;
+    }
+
+    /* inner element effects can translate */
+    .ad__num {
+      font-family: var(--mono);
+      color: var(--lo);
+      font-size: 12px;
+      margin-right: 10px;
+    }
+
+    /* drawn underline — only used by the depthzoom module, hidden elsewhere */
+    .ad__line {
+      display: none;
+    }
+
+    .ad[data-fx="depthzoom"] .ad__row {
+      background: none;
+      border: none;
+      border-radius: 0;
+      padding: 14px 2px;
+    }
+
+    .ad[data-fx="depthzoom"] .ad__line {
+      display: block;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 2px;
+      width: 100%;
+      background: var(--line);
+      transform-origin: 50% 50%;
+    }
+
+    .ad[data-fx="depthzoom"] .ad__row:nth-child(2) .ad__line {
+      background: var(--signal);
+    }
+
+    .ad[data-fx="depthzoom"] .ad__row:nth-child(3) .ad__line {
+      background: #E8EDF2;
+    }
+
+    footer {
+      padding: 80px 0 110px;
+      text-align: center;
+      color: var(--lo);
+    }
+
+    footer .big {
+      font-family: var(--display);
+      font-weight: 700;
+      color: var(--hi);
+      font-size: clamp(24px, 4vw, 44px);
+      letter-spacing: -.02em;
+      margin-bottom: 18px;
+    }
+
+    footer .metaf {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .08em;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--line);
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar"><i id="topbar"></i></div>
+  <a class="backlink" href="index.html">← 標本表 I</a>
+
+  <div class="wrap">
+
+    <!-- INTRO -->
+    <header class="intro">
+      <div class="kicker">Ad Module Lab</div>
+      <h1>同一個版型，<br><em>三種</em>進場。</h1>
+      <p>
+        一個外框、一行 AI 導讀、三個橫向並排的文字框——這是數位廣告最常見的模組。
+        下面用同一份版型重複三次，每一次換一種 GSAP 效果，<b style="color:var(--hi)">捲到畫面內才開始播</b>。
+      </p>
+      <div class="legend">
+        <span>01 · 3D 翻入</span><span>02 · 景深推進</span><span>03 · 遮罩橫掃</span>
+      </div>
+    </header>
+
+    <!-- modules are injected here by JS so markup stays DRY -->
+    <main id="modules"></main>
+
+    <footer>
+      <div class="big">想換成你的素材？</div>
+      <div class="metaf">
+        改 JS 裡的 MODULES 陣列即可換文字與效果<br>
+        <a href="advanced.html">→ 進階標本表 II</a> &nbsp;·&nbsp; <a href="index.html">← 標本表 I</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- GSAP + plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js"></script>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger, SplitText);
+
+    /* ---------- content (swap freely) ---------- */
+    const MODULES = [
+      {
+        fx: "flip3d", name: "3D 翻入 / rotationX",
+        title: "AI 導讀：用一句話，先看懂整支廣告的重點。",
+        rows: ["智慧排版，讓每一格文字都落在最吸睛的位置。",
+          "即時生成導讀，把冗長訊息濃縮成一行重點。",
+          "跨裝置自動適配，手機平板桌機都剛剛好。"]
+      },
+
+      {
+        fx: "depthzoom", name: "景深推進 / z + scale",
+        title: "AI 導讀：從遠方推進，把焦點直送眼前。",
+        rows: ["由遠到近的景深推進，強化主打訊息。",
+          "縮放與淡入同步，視覺重心自然集中。",
+          "適合促銷主標，一進場就是全場焦點。"]
+      },
+
+      {
+        fx: "clip", name: "遮罩橫掃 / mask wipe",
+        title: "AI 導讀：像刷一道光，把文字一行行揭開。",
+        rows: ["遮罩橫掃揭露，乾淨俐落的資訊揭示。",
+          "標題逐字浮現，閱讀節奏被精準掌控。",
+          "適合資訊型廣告，條列重點清楚好讀。"]
+      },
+    ];
+
+    /* ---------- build markup (DRY: same layout every time) ---------- */
+    const host = document.getElementById("modules");
+    MODULES.forEach((m, i) => {
+      const stop = document.createElement("section");
+      stop.className = "ad-stop";
+      stop.innerHTML = `
+    <article class="ad" data-fx="${m.fx}">
+      <div class="ad__badge"><span class="no">MODULE ${String(i + 1).padStart(2, "0")}</span> · EFFECT / ${m.name}</div>
+      <h2 class="ad__title"><span class="lead">${m.title}</span></h2>
+      <div class="ad__rows">
+        ${m.rows.map((t, ri) => `<p class="ad__row"><span class="ad__row-i"><span class="ad__num">0${ri + 1}</span>${t}</span><span class="ad__line"></span></p>`).join("")}
+      </div>
+    </article>`;
+      host.appendChild(stop);
+    });
+
+    /* top progress bar */
+    gsap.to("#topbar", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: 0.3 } });
+
+    /* ---------- effects ---------- */
+    const fx = {
+      // 01 · gentle 3D tilt-in, then title words and rows rise — slow & smooth
+      flip3d(ad, title, rows) {
+        const words = new SplitText(title, { type: "words" }).words;
+        const tl = gsap.timeline({ scrollTrigger: { trigger: ad, start: "top 78%", toggleActions: "play none none reverse" } });
+        // gentler rotation (-44 vs -75) + longer duration + power2 = no shadow thrash
+        tl.from(ad, { rotationX: -44, y: 50, autoAlpha: 0, transformPerspective: 1300, transformOrigin: "50% 0%", duration: 1.4, ease: "power2.out" })
+          // title rises word by word instead of per-char 3D flips (much smoother)
+          .from(words, { yPercent: 60, autoAlpha: 0, stagger: 0.05, duration: 0.8, ease: "power2.out" }, "-=0.85")
+          .from(rows, { y: 42, autoAlpha: 0, stagger: 0.18, duration: 0.8, ease: "power2.out" }, "-=0.5");
+      },
+
+      // 02 · gentle push from mid distance, then per box: draw a plain line from a
+      //      point (no box styling), then the words rise in — slow, one box at a time.
+      depthzoom(ad, title, rows) {
+        const titleWords = new SplitText(title, { type: "words" }).words;
+        const lines = [...rows].map(r => r.querySelector(".ad__line"));
+        const rowWords = [...rows].map(r => new SplitText(r.querySelector(".ad__row-i"), { type: "words" }).words);
+
+        // initial states applied now, so nothing flashes before the trigger fires
+        gsap.set(ad, { autoAlpha: 0 });
+        gsap.set(titleWords, { autoAlpha: 0, y: 14 });
+        lines.forEach(l => gsap.set(l, { scaleX: 0, transformOrigin: "50% 50%" })); // collapsed to a point
+        rowWords.forEach(ws => gsap.set(ws, { yPercent: 120, autoAlpha: 0 }));       // hidden below the line
+
+        const tl = gsap.timeline({ scrollTrigger: { trigger: ad, start: "top 75%", toggleActions: "play none none reverse" } });
+
+        // 1) card eases in from mid distance — small move = smooth
+        tl.fromTo(ad, { scale: 0.96, z: -110 }, { scale: 1, z: 0, autoAlpha: 1, duration: 0.9, ease: "power2.out" })
+          // 2) title words settle in
+          .to(titleWords, { autoAlpha: 1, y: 0, stagger: 0.05, duration: 0.5 }, "-=0.35");
+
+        // 3) box by box, slowly: draw the line out from a point, then words rise word by word
+        rows.forEach((r, i) => {
+          tl.to(lines[i], { scaleX: 1, duration: 0.7, ease: "power2.inOut" }, "+=0.25")        // draw the line, slow & clear
+            .to(rowWords[i], { yPercent: 0, autoAlpha: 1, stagger: 0.1, duration: 0.6, ease: "power2.out" }, "-=0.05"); // 逐詞上升
+        });
+      },
+
+      // 06 · mask wipe — rows reveal behind a clip, title chars rise inside a mask
+      clip(ad, title, rows) {
+        const lines = new SplitText(title, { type: "lines", mask: "lines" }).lines;
+        const inners = ad.querySelectorAll(".ad__row-i");
+        const tl = gsap.timeline({ scrollTrigger: { trigger: ad, start: "top 78%", toggleActions: "play none none reverse" } });
+        tl.from(ad, { autoAlpha: 0, y: 24, duration: 0.5 })
+          .from(lines, { yPercent: 115, stagger: 0.12, duration: 0.6, ease: "power3.out" }, "-=0.2")
+          .from(inners, {
+            xPercent: (i) => i % 2 ? 110 : -110, autoAlpha: 0,
+            stagger: 0.14, duration: 0.6, ease: "power3.out"
+          }, "-=0.3");
+      }
+    };
+
+    /* ---------- wire up, respecting reduced motion ---------- */
+    const mm = gsap.matchMedia();
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      document.querySelectorAll(".ad").forEach((ad) => {
+        const title = ad.querySelector(".ad__title");
+        const rows = ad.querySelectorAll(".ad__row");
+        const fn = fx[ad.dataset.fx];
+        if (fn) fn(ad, title, rows);
+      });
+    });
+
+    /* refresh once fonts settle so triggers measure correctly */
+    document.fonts.ready.then(() => ScrollTrigger.refresh());
+    window.addEventListener("load", () => ScrollTrigger.refresh());
+  </script>
+</body>
+
+</html>

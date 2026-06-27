@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MOTION SPECIMEN — GSAP 動態標本表</title>
+<meta name="description" content="一張用 GSAP 打造的動態標本表：tween、ease、timeline、ScrollTrigger、SplitText、Draggable、Flip 的本機示範。" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --ink:        #0E1116;  /* background ink */
+    --panel:      #161B22;  /* raised panel */
+    --panel-2:    #1C232C;  /* deeper panel */
+    --line:       #00E0C6;  /* plotter teal — primary accent */
+    --signal:     #FF5C38;  /* vermilion — secondary accent */
+    --grid:       rgba(255,255,255,0.055);
+    --grid-bold:  rgba(255,255,255,0.10);
+    --hi:         #E8EDF2;  /* text high */
+    --lo:         #8A95A3;  /* text low */
+    --hairline:   rgba(255,255,255,0.12);
+    --rail:       84px;
+
+    --display: "Space Grotesk", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+    --body: "Inter", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: auto; }
+
+  body {
+    background: var(--ink);
+    color: var(--hi);
+    font-family: var(--body);
+    line-height: 1.5;
+    overflow-x: hidden;
+    /* faint oscilloscope graph paper across the whole page */
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  ::selection { background: var(--signal); color: #fff; }
+
+  /* ---------- Left rail / progress ruler ---------- */
+  .rail {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: var(--rail);
+    border-right: 1px solid var(--hairline);
+    background: rgba(14,17,22,0.72);
+    backdrop-filter: blur(6px);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+  }
+  .rail__mark {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--lo);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+  .rail__mark--top { color: var(--hi); }
+  .rail__progwrap {
+    flex: 1;
+    width: 2px;
+    margin: 18px 0;
+    background: var(--grid-bold);
+    position: relative;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .rail__prog {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(var(--line), var(--signal));
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  .rail__dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--line);
+    box-shadow: 0 0 12px var(--line);
+  }
+
+  /* ---------- Layout shell ---------- */
+  .shell { margin-left: var(--rail); }
+  section {
+    position: relative;
+    padding: clamp(72px, 11vh, 140px) clamp(20px, 6vw, 96px);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--line);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 28px; height: 1px;
+    background: var(--line);
+  }
+  .eyebrow .no { color: var(--signal); }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(28px, 4.4vw, 56px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .lede {
+    max-width: 60ch;
+    color: var(--lo);
+    font-size: clamp(15px, 1.4vw, 18px);
+    margin-bottom: 44px;
+  }
+  .lede b { color: var(--hi); font-weight: 500; }
+  code, .k {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    color: var(--line);
+    background: rgba(0,224,198,0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .hero__top {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 40px;
+    align-items: center;
+  }
+  .hero__title {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(48px, 10vw, 150px);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+  }
+  .hero__title .row { overflow: clip; display: block; }
+  .hero__title em {
+    font-style: normal;
+    color: var(--line);
+  }
+  .hero__sub {
+    margin-top: 28px;
+    max-width: 46ch;
+    color: var(--lo);
+    font-size: clamp(15px, 1.5vw, 19px);
+  }
+  .hero__meta {
+    display: flex;
+    gap: 28px;
+    margin-top: 34px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--lo);
+    flex-wrap: wrap;
+  }
+  .hero__meta b { color: var(--signal); font-weight: 500; }
+
+  .skills-showcase-btn {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--line);
+    text-decoration: none;
+    border: 1px solid var(--line);
+    padding: 12px 24px;
+    border-radius: 4px;
+    background: rgba(0, 224, 198, 0.05);
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0, 224, 198, 0.1);
+    margin-top: 24px;
+  }
+  .skills-showcase-btn:hover {
+    background: var(--line);
+    color: var(--ink);
+    box-shadow: 0 0 25px rgba(0, 224, 198, 0.35);
+    transform: translateY(-2px);
+  }
+
+  /* live ease plotter (hero signature) */
+  .plotter {
+    border: 1px solid var(--hairline);
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/100% 25%,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/12.5% 100%,
+      var(--panel);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+  }
+  .plotter__label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--lo);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .plotter__label b { color: var(--line); font-weight: 500; }
+  .plotter svg { width: 100%; height: auto; display: block; }
+  .plot-curve { fill: none; stroke: var(--line); stroke-width: 2; }
+  .plot-axis  { stroke: var(--grid-bold); stroke-width: 1; }
+  .plot-dot   { fill: var(--signal); }
+  .plot-ghost { fill: none; stroke: var(--hairline); stroke-width: 1; stroke-dasharray: 3 4; }
+
+  .hero__scroll {
+    align-self: end;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--lo);
+    padding-top: 26px;
+    text-transform: uppercase;
+  }
+  .hero__scroll .bar {
+    width: 56px; height: 1px; background: var(--lo);
+    position: relative; overflow: hidden;
+  }
+  .hero__scroll .bar::after {
+    content:""; position:absolute; inset:0; background: var(--line);
+    transform: translateX(-100%);
+    animation: sweep 1.8s linear infinite;
+  }
+  @keyframes sweep { to { transform: translateX(100%); } }
+
+  /* ---------- Ease lab ---------- */
+  .ease-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+  }
+  .ease-card {
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    background: var(--panel);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color .2s, transform .2s;
+  }
+  .ease-card:hover { border-color: var(--line); transform: translateY(-2px); }
+  .ease-card__name {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--hi);
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+  }
+  .ease-card__name span { color: var(--lo); font-size: 10px; }
+  .ease-card svg { width: 100%; height: 76px; display: block; }
+  .ease-track {
+    margin-top: 12px;
+    height: 12px;
+    border-radius: 6px;
+    background: var(--panel-2);
+    position: relative;
+  }
+  .ease-runner {
+    position: absolute;
+    top: 50%;
+    left: 4px;
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    background: var(--signal);
+    transform: translateY(-50%);
+    box-shadow: 0 0 10px rgba(255,92,56,0.5);
+  }
+
+  /* ---------- Generic controls ---------- */
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 28px; }
+  .btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--hi);
+    background: var(--panel);
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: all .18s;
+  }
+  .btn:hover { border-color: var(--line); color: var(--line); }
+  .btn[aria-pressed="true"], .btn.is-active {
+    background: var(--line); color: var(--ink); border-color: var(--line);
+  }
+  .btn--signal:hover { border-color: var(--signal); color: var(--signal); }
+  input[type="range"] { accent-color: var(--line); width: 220px; max-width: 50vw; }
+  .readout { font-family: var(--mono); font-size: 12px; color: var(--lo); }
+  .readout b { color: var(--signal); }
+
+  /* ---------- Timeline stage ---------- */
+  .tl-stage {
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    background: var(--panel);
+    height: 260px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+  }
+  .tl-box {
+    width: 64px; height: 64px; border-radius: 10px;
+    display: grid; place-items: center;
+    font-family: var(--mono); font-size: 12px; color: var(--ink);
+    font-weight: 500;
+  }
+  .tl-box.b1 { background: var(--line); }
+  .tl-box.b2 { background: var(--signal); }
+  .tl-box.b3 { background: #E8EDF2; }
+  .tl-orbit {
+    position: absolute;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--line); top: 30px; left: 30px;
+    box-shadow: 0 0 12px var(--line);
+  }
+
+  /* ---------- ScrollTrigger scrolly ---------- */
+  .pin-wrap { position: relative; }
+  .pin-panel {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+  .pin-readout {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(60px, 12vw, 180px);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--line);
+  }
+  .pin-readout small {
+    display:block; font-family: var(--mono); font-weight:400;
+    font-size: 13px; letter-spacing: 0.2em; color: var(--lo);
+    margin-top: 10px;
+  }
+  .pin-stage { position: relative; height: 60vh; border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .para {
+    position: absolute; border-radius: 50%;
+  }
+  .para.p1 { width: 180px; height: 180px; background: rgba(0,224,198,0.16); top: 10%; left: 12%; }
+  .para.p2 { width: 120px; height: 120px; background: rgba(255,92,56,0.18); bottom: 14%; right: 16%; }
+  .para.p3 { width: 60px; height: 60px; border: 1px solid var(--line); top: 50%; left: 55%; }
+  .pin-bar { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--signal); width: 0; }
+
+  /* batch reveal cards */
+  .batch-grid {
+    margin-top: 56px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+  }
+  .batch-card {
+    aspect-ratio: 4/3;
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    background: var(--panel);
+    display: grid; place-items: center;
+    font-family: var(--mono); font-size: 22px; color: var(--line);
+    will-change: transform, opacity;
+  }
+
+  /* ---------- Horizontal scroll ---------- */
+  .h-section { overflow: hidden; padding: 0; border-bottom: 1px solid var(--hairline); }
+  .h-track { display: flex; height: 100vh; width: max-content; }
+  .h-panel {
+    width: 78vw; height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 clamp(28px, 6vw, 100px);
+    border-right: 1px solid var(--hairline);
+    flex: 0 0 auto;
+  }
+  .h-panel .idx {
+    font-family: var(--display); font-weight: 700;
+    font-size: clamp(80px, 16vw, 230px); line-height: 0.85;
+    letter-spacing: -0.05em; color: var(--panel-2);
+    -webkit-text-stroke: 1px var(--hairline);
+  }
+  .h-panel h3 {
+    font-family: var(--display); font-weight: 500;
+    font-size: clamp(22px, 3vw, 40px); margin: 18px 0 12px;
+  }
+  .h-panel p { color: var(--lo); max-width: 42ch; }
+  .h-panel .chip {
+    margin-top: 18px; align-self: flex-start;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+    color: var(--signal); border: 1px solid var(--signal); border-radius: 999px;
+    padding: 6px 14px;
+  }
+
+  /* ---------- SplitText specimens ---------- */
+  .split-block { margin-bottom: 40px; }
+  .split-tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
+    color: var(--lo); margin-bottom: 12px;
+  }
+  .split-line {
+    font-family: var(--display); font-weight: 500;
+    font-size: clamp(26px, 5vw, 64px); line-height: 1.05; letter-spacing: -0.02em;
+  }
+  .split-line .word { display: inline-block; }
+  .mask-line { overflow: clip; }
+
+  /* ---------- Draggable ---------- */
+  .drag-arena {
+    position: relative;
+    height: 420px;
+    border: 1px dashed var(--hairline);
+    border-radius: 12px;
+    background:
+      radial-gradient(circle at 1px 1px, var(--grid-bold) 1px, transparent 0) 0 0/24px 24px,
+      var(--panel);
+    overflow: hidden;
+  }
+  .drag-card {
+    position: absolute;
+    width: 128px; height: 152px;
+    border-radius: 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--hairline);
+    padding: 14px;
+    cursor: grab;
+    touch-action: none;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  }
+  .drag-card:active { cursor: grabbing; }
+  .drag-card .n { font-family: var(--display); font-weight: 700; font-size: 30px; }
+  .drag-card .t { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; color: var(--lo); margin-top: 6px; }
+  .drag-card .swatch { width: 100%; height: 56px; border-radius: 6px; margin-top: 14px; }
+  .drag-hint { position: absolute; right: 16px; bottom: 14px; font-family: var(--mono); font-size: 11px; color: var(--lo); letter-spacing: 0.12em; }
+
+  /* ---------- Flip ---------- */
+  .flip-grid {
+    display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;
+  }
+  .flip-grid.is-list { flex-direction: column; }
+  .flip-item {
+    flex: 0 0 auto;
+    width: 120px; height: 120px;
+    border-radius: 10px;
+    border: 1px solid var(--hairline);
+    background: var(--panel);
+    display: grid; place-items: center;
+    font-family: var(--mono); font-size: 13px; color: var(--hi);
+    position: relative;
+  }
+  .flip-grid.is-list .flip-item {
+    width: 100%; height: 56px;
+    justify-content: flex-start; padding-left: 18px;
+  }
+  .flip-item .dot { position: absolute; top: 10px; right: 10px; width: 9px; height: 9px; border-radius: 50%; }
+  .flip-grid.is-list .flip-item .dot { top: 50%; right: 16px; transform: translateY(-50%); }
+  .tag-a .dot { background: var(--line); }
+  .tag-b .dot { background: var(--signal); }
+  .tag-c .dot { background: #E8EDF2; }
+
+  /* ---------- Footer ---------- */
+  footer {
+    padding: 64px clamp(20px, 6vw, 96px) 80px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    flex-wrap: wrap; gap: 24px;
+  }
+  footer .big {
+    font-family: var(--display); font-weight: 700;
+    font-size: clamp(28px, 5vw, 64px); letter-spacing: -0.03em; line-height: 1;
+  }
+  footer .meta { font-family: var(--mono); font-size: 12px; color: var(--lo); letter-spacing: 0.08em; text-align: right; }
+  footer a { color: var(--line); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* focus visibility for a11y */
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--line); outline-offset: 3px;
+  }
+
+  @media (max-width: 860px) {
+    :root { --rail: 56px; }
+    .hero__top { grid-template-columns: 1fr; }
+    .pin-panel { grid-template-columns: 1fr; gap: 24px; }
+    .rail__mark { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LEFT RAIL ============ -->
+<aside class="rail" aria-hidden="true">
+  <div class="rail__mark rail__mark--top">GSAP&nbsp;·&nbsp;3.15</div>
+  <div class="rail__progwrap"><div class="rail__prog" id="railProg"></div></div>
+  <div class="rail__dot"></div>
+  <div class="rail__mark">SPECIMEN&nbsp;SHEET</div>
+</aside>
+
+<div class="shell">
+
+  <!-- ============ HERO ============ -->
+  <header class="hero" id="top">
+    <div class="hero__top">
+      <div>
+        <h1 class="hero__title" aria-label="Motion is a material">
+          <span class="row">Motion</span>
+          <span class="row">is a <em>material.</em></span>
+        </h1>
+        <p class="hero__sub" id="heroSub">
+          一張用 GSAP 打造的<b>動態標本表</b>。往下捲，逐格檢視這個動畫引擎的七種能耐——
+          每一格都在本機即時運算，沒有錄影、沒有假動畫。
+        </p>
+        <div class="hero__meta">
+          <span>ENGINE / <b>GSAP</b></span>
+          <span>PLUGINS / <b>5</b></span>
+          <span>BUILD / <b>100% LOCAL</b></span>
+        </div>
+        <div>
+          <a href="skills-demo.html" class="skills-showcase-btn">GSAP AI 技能展示頁 (NEW) &rarr;</a>
+        </div>
+      </div>
+
+      <!-- SIGNATURE: live ease plotter -->
+      <div class="plotter" id="plotter">
+        <div class="plotter__label">
+          <span>EASE PLOT — <b id="plotName">power3.out</b></span>
+          <span>t → value</span>
+        </div>
+        <svg viewBox="0 0 320 200" preserveAspectRatio="none" aria-hidden="true">
+          <line class="plot-axis" x1="0" y1="200" x2="320" y2="200"></line>
+          <line class="plot-axis" x1="0" y1="0" x2="0" y2="200"></line>
+          <path class="plot-ghost" d="M0,200 L320,0"></path>
+          <path class="plot-curve" id="plotCurve" d=""></path>
+          <circle class="plot-dot" id="plotDot" r="5" cx="0" cy="200"></circle>
+        </svg>
+      </div>
+    </div>
+
+    <div class="hero__scroll">
+      <span>Scroll to inspect</span>
+      <span class="bar"></span>
+      <span>07 specimens</span>
+    </div>
+  </header>
+
+  <!-- ============ 01 · EASE LAB ============ -->
+  <section id="s1">
+    <div class="eyebrow"><span class="no">01</span> Tween &amp; Ease</div>
+    <h2>手感，藏在曲線裡。</h2>
+    <p class="lede">
+      同一段距離，不同的 <b>ease</b> 就是完全不同的個性。下面每一格左邊是 GSAP
+      內建緩動函數的<b>真實取樣曲線</b>，右邊的方塊就照那條曲線移動。點任何一格重播。
+    </p>
+    <div class="ease-grid" id="easeGrid"><!-- built by JS --></div>
+  </section>
+
+  <!-- ============ 02 · TIMELINE ============ -->
+  <section id="s2">
+    <div class="eyebrow"><span class="no">02</span> Timeline</div>
+    <h2>把動作排成一條時間軸。</h2>
+    <p class="lede">
+      <code>gsap.timeline()</code> 用 position 參數把多個動作精準編排成序列，並且可以
+      <b>暫停、倒轉、變速、任意定位</b>。拖下面的滑桿就是在 scrub 整條時間軸。
+    </p>
+    <div class="controls">
+      <button class="btn" id="tlPlay">▶ Play</button>
+      <button class="btn" id="tlReverse">◀ Reverse</button>
+      <button class="btn btn--signal" id="tlRestart">↺ Restart</button>
+      <input type="range" id="tlScrub" min="0" max="1000" value="0" aria-label="timeline scrubber" />
+      <span class="readout">progress <b id="tlPct">0%</b></span>
+    </div>
+    <div class="tl-stage">
+      <div class="tl-orbit" id="tlOrbit"></div>
+      <div class="tl-box b1">A</div>
+      <div class="tl-box b2">B</div>
+      <div class="tl-box b3">C</div>
+    </div>
+  </section>
+
+  <!-- ============ 03 · SCROLLTRIGGER ============ -->
+  <section id="s3" style="padding-bottom:0;">
+    <div class="eyebrow"><span class="no">03</span> ScrollTrigger</div>
+    <h2>讓捲軸驅動動畫。</h2>
+    <p class="lede">
+      <code>scrub</code> 把動畫進度綁在捲動位置上，<code>pin</code> 把區塊釘住做滾動敘事，
+      <code>batch</code> 讓進入畫面的元素成批浮現。下面這塊會釘住，數字跟著你的捲動跑。
+    </p>
+  </section>
+
+  <div class="pin-wrap" id="pinWrap">
+    <div class="pin-panel" style="padding:0 clamp(20px,6vw,96px);">
+      <div>
+        <div class="pin-readout"><span id="pinNum">0</span><small>SCROLL-LINKED COUNTER · scrub:true</small></div>
+      </div>
+      <div class="pin-stage">
+        <div class="para p1" id="para1"></div>
+        <div class="para p2" id="para2"></div>
+        <div class="para p3" id="para3"></div>
+        <div class="pin-bar" id="pinBar"></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="s3b">
+    <p class="lede" style="margin-bottom:0;">
+      <b>ScrollTrigger.batch()</b> — 下面這排卡片在進入視窗時成批、交錯浮現（往回捲會收回）：
+    </p>
+    <div class="batch-grid" id="batchGrid"><!-- built by JS --></div>
+  </section>
+
+  <!-- ============ 04 · HORIZONTAL SCROLL ============ -->
+  <section class="h-section" id="hSection">
+    <div class="h-track" id="hTrack">
+      <div class="h-panel">
+        <div class="idx">04</div>
+        <h3>橫向滾動 / containerAnimation</h3>
+        <p>垂直捲動，內容卻往左橫移。祕訣是把橫移 tween 的 <code>ease</code> 設成 <code>"none"</code>，並 pin 住外層容器。</p>
+        <span class="chip">KEEP SCROLLING →</span>
+      </div>
+      <div class="h-panel"><div class="idx">↗</div><h3>每一格都是一個 panel</h3><p>這是「假橫向滾動」最常見的版型：作品集、產品流程、時間軸都很適合。</p></div>
+      <div class="h-panel"><div class="idx">✦</div><h3>巢狀觸發</h3><p>橫向移動本身也能當觸發來源——把 <code>containerAnimation</code> 指到橫移 tween 即可。</p></div>
+      <div class="h-panel"><div class="idx">●</div><h3>回到垂直</h3><p>滑到最後一格，pin 解除，頁面繼續正常往下捲。乾淨俐落。</p></div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · SPLITTEXT ============ -->
+  <section id="s5">
+    <div class="eyebrow"><span class="no">05</span> SplitText</div>
+    <h2>文字也能逐字呼吸。</h2>
+    <p class="lede">
+      <code>SplitText</code> 把一段文字拆成字元 / 單字 / 行，每個單位都是獨立元素，
+      於是可以逐字、逐詞、逐行交錯動畫。捲到這裡會自動觸發。
+    </p>
+
+    <div class="split-block">
+      <div class="split-tag">TYPE: CHARS · 逐字浮現</div>
+      <div class="split-line" data-split="chars">Typography in motion.</div>
+    </div>
+    <div class="split-block">
+      <div class="split-tag">TYPE: WORDS · 逐詞上升</div>
+      <div class="split-line" data-split="words">每一個 字 都 各自 就定位。</div>
+    </div>
+    <div class="split-block">
+      <div class="split-tag">TYPE: LINES + MASK · 遮罩揭露</div>
+      <div class="split-line" data-split="lines">這是一段比較長的句子，<br>它會以遮罩的方式一行一行被揭開，<br>就像捲動中的字幕。</div>
+    </div>
+  </section>
+
+  <!-- ============ 06 · DRAGGABLE ============ -->
+  <section id="s6">
+    <div class="eyebrow"><span class="no">06</span> Draggable + Inertia</div>
+    <h2>抓住它，然後甩出去。</h2>
+    <p class="lede">
+      <code>Draggable</code> 讓元素可被拖曳，搭配 <b>InertiaPlugin</b> 後放手會帶著
+      <b>慣性</b>滑行、撞到邊界回彈。直接用滑鼠或手指拖下面的卡片試試。
+    </p>
+    <div class="drag-arena" id="dragArena">
+      <span class="drag-hint">DRAG · THROW · BOUNCE</span>
+    </div>
+  </section>
+
+  <!-- ============ 07 · FLIP ============ -->
+  <section id="s7">
+    <div class="eyebrow"><span class="no">07</span> Flip</div>
+    <h2>兩個佈局之間，平滑過渡。</h2>
+    <p class="lede">
+      改變 DOM 後，<code>Flip</code> 會自動補上「從舊位置到新位置」的動畫——
+      篩選、排序、grid↔list 切換都不再是瞬間跳動。試試下面的篩選與版型切換。
+    </p>
+    <div class="controls">
+      <button class="btn is-active" data-filter="all">All</button>
+      <button class="btn" data-filter="a">● A</button>
+      <button class="btn" data-filter="b">● B</button>
+      <button class="btn" data-filter="c">● C</button>
+      <span style="flex:1"></span>
+      <button class="btn btn--signal" id="flipLayout">⇄ Grid / List</button>
+    </div>
+    <div class="flip-grid" id="flipGrid"><!-- built by JS --></div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div>
+      <div class="big">7 specimens.<br>1 engine.</div>
+    </div>
+    <div class="meta">
+      BUILT WITH GSAP 3.13 + SCROLLTRIGGER · SPLITTEXT · DRAGGABLE · INERTIA · FLIP<br>
+      ALL PLUGINS NOW FREE — <a href="https://gsap.com/docs/v3/" target="_blank" rel="noopener">gsap.com/docs</a><br>
+      <a href="advanced.html">→ 進階標本表 II（MotionPath · DrawSVG · MorphSVG · ScrollSmoother）</a><br>
+      <a href="ad-modules.html">→ 廣告模組實驗室（6 種進場效果）</a><br>
+      <a href="#top">↑ BACK TO TOP</a>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ============ GSAP + PLUGINS (CDN) ============ -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Draggable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/InertiaPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js"></script>
+
+<script>
+gsap.registerPlugin(ScrollTrigger, Draggable, InertiaPlugin, Flip, SplitText);
+gsap.defaults({ duration: 0.6, ease: "power2.out" });
+
+/* Respect reduced-motion: wrap all motion in matchMedia so it can be reverted */
+const mm = gsap.matchMedia();
+
+/* ---------- helpers ---------- */
+// Build an SVG path string by sampling a real GSAP ease across t = 0..1.
+// SVG y grows downward, so we flip: y = (1 - easedValue) * height.
+function easePath(easeName, w, h, samples = 60) {
+  const fn = gsap.parseEase(easeName);
+  let d = "";
+  for (let i = 0; i <= samples; i++) {
+    const t = i / samples;
+    const x = t * w;
+    const y = (1 - fn(t)) * h;
+    d += (i === 0 ? "M" : "L") + x.toFixed(1) + "," + y.toFixed(1) + " ";
+  }
+  return d.trim();
+}
+
+/* =====================================================
+   GLOBAL: rail progress (always on, even reduced motion)
+   ===================================================== */
+gsap.to("#railProg", {
+  scaleY: 1, ease: "none",
+  scrollTrigger: { start: 0, end: "max", scrub: 0.3 }
+});
+
+/* =====================================================
+   HERO: live ease plotter — dot traces the real curve
+   ===================================================== */
+(function heroPlotter() {
+  const W = 320, H = 200;
+  const eases = ["power3.out", "back.out(1.7)", "elastic.out(1,0.4)", "bounce.out", "expo.inOut"];
+  const curve = document.getElementById("plotCurve");
+  const dot = document.getElementById("plotDot");
+  const nameEl = document.getElementById("plotName");
+  let idx = 0;
+
+  function run() {
+    const name = eases[idx];
+    const fn = gsap.parseEase(name);
+    nameEl.textContent = name;
+    curve.setAttribute("d", easePath(name, W, H));
+    const proxy = { t: 0 };
+    gsap.to(proxy, {
+      t: 1, duration: 1.6, ease: "none",
+      onUpdate() {
+        const x = proxy.t * W;
+        const y = (1 - fn(proxy.t)) * H;
+        gsap.set(dot, { attr: { cx: x, cy: y } });
+      },
+      onComplete() {
+        idx = (idx + 1) % eases.length;
+        gsap.delayedCall(0.5, run);
+      }
+    });
+  }
+  run();
+})();
+
+/* =====================================================
+   HERO title — SplitText reveal after fonts are ready
+   ===================================================== */
+document.fonts.ready.then(() => {
+  mm.add("(prefers-reduced-motion: no-preference)", () => {
+    const rows = document.querySelectorAll(".hero__title .row");
+    const tl = gsap.timeline();
+    rows.forEach(row => {
+      const split = new SplitText(row, { type: "chars" });
+      tl.from(split.chars, {
+        yPercent: 120, opacity: 0, stagger: 0.03, duration: 0.8, ease: "power3.out"
+      }, "-=0.5");
+    });
+    tl.from("#heroSub", { y: 16, opacity: 0, duration: 0.6 }, "-=0.3")
+      .from(".hero__meta span", { y: 10, opacity: 0, stagger: 0.08 }, "-=0.4")
+      .from(".skills-showcase-btn", { y: 15, opacity: 0, duration: 0.6, ease: "power2.out" }, "-=0.3");
+  });
+  // recalc trigger positions once fonts shift layout
+  ScrollTrigger.refresh();
+});
+
+/* =====================================================
+   01 · EASE LAB — curve + runner per ease
+   ===================================================== */
+(function easeLab() {
+  const data = [
+    ["power1.out", "gentle"], ["power3.out", "default+"], ["power4.inOut", "strong"],
+    ["back.out(1.7)", "overshoot"], ["elastic.out(1,0.35)", "springy"], ["bounce.out", "drop"],
+    ["expo.out", "snappy"], ["circ.inOut", "wheel"]
+  ];
+  const grid = document.getElementById("easeGrid");
+  const W = 240, H = 76;
+
+  data.forEach(([ease, tag]) => {
+    const card = document.createElement("div");
+    card.className = "ease-card";
+    card.innerHTML = `
+      <div class="ease-card__name">${ease}<span>${tag}</span></div>
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <path d="M0,${H} L${W},0" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="3 4"/>
+        <path d="${easePath(ease, W, H)}" fill="none" stroke="var(--line)" stroke-width="2"/>
+      </svg>
+      <div class="ease-track"><div class="ease-runner"></div></div>`;
+    const runner = card.querySelector(".ease-runner");
+
+    const play = () => gsap.fromTo(runner,
+      { left: 4 },
+      { left: "calc(100% - 20px)", duration: 1.1, ease, overwrite: true });
+
+    card.addEventListener("click", play);
+    grid.appendChild(card);
+
+    // auto-play once when scrolled into view
+    ScrollTrigger.create({ trigger: card, start: "top 85%", once: true, onEnter: play });
+  });
+})();
+
+/* =====================================================
+   02 · TIMELINE — orchestrated + scrubbable
+   ===================================================== */
+(function timelineDemo() {
+  const tl = gsap.timeline({ paused: true, defaults: { duration: 0.7, ease: "power2.inOut" } });
+  tl.from(".tl-box", { scale: 0, rotation: -45, stagger: 0.12, ease: "back.out(1.7)" })
+    .addLabel("spread")
+    .to(".b1", { x: -120, rotation: 360 }, "spread")
+    .to(".b2", { y: -70, rotation: 180 }, "spread")
+    .to(".b3", { x: 120, rotation: 360 }, "spread")
+    .addLabel("gather")
+    .to(".tl-box", { x: 0, y: 0, rotation: 0, duration: 0.8 }, "gather+=0.1")
+    .to(".tl-box", { backgroundColor: "#00E0C6", stagger: 0.1 }, "<");
+
+  // orbit runs continuously around the stage corner
+  gsap.to("#tlOrbit", {
+    repeat: -1, duration: 4, ease: "none",
+    keyframes: { x: [0, 220, 220, 0, 0], y: [0, 0, 140, 140, 0] }
+  });
+
+  const scrub = document.getElementById("tlScrub");
+  const pct = document.getElementById("tlPct");
+
+  document.getElementById("tlPlay").onclick = () => tl.play();
+  document.getElementById("tlReverse").onclick = () => tl.reverse();
+  document.getElementById("tlRestart").onclick = () => tl.restart();
+
+  // two-way binding between timeline and the range slider
+  tl.eventCallback("onUpdate", () => {
+    const p = tl.progress();
+    scrub.value = p * 1000;
+    pct.textContent = Math.round(p * 100) + "%";
+  });
+  scrub.addEventListener("input", () => {
+    tl.pause();
+    tl.progress(scrub.value / 1000);
+  });
+})();
+
+/* =====================================================
+   03 · SCROLLTRIGGER — pinned counter + parallax + batch
+   ===================================================== */
+mm.add("(prefers-reduced-motion: no-preference)", () => {
+  // pinned scrolly: counter + bar + parallax tied to scroll progress
+  ScrollTrigger.create({
+    trigger: "#pinWrap",
+    start: "top top",
+    end: "+=1400",
+    pin: true,
+    scrub: 0.6,
+    onUpdate: (self) => {
+      const p = self.progress;
+      document.getElementById("pinNum").textContent = Math.round(p * 100);
+      gsap.set("#pinBar", { width: (p * 100) + "%" });
+      gsap.set("#para1", { y: p * -120, x: p * 60 });
+      gsap.set("#para2", { y: p * 90, x: p * -40 });
+      gsap.set("#para3", { x: p * 160, rotation: p * 220 });
+    }
+  });
+
+  // batch reveal
+  gsap.set(".batch-card", { y: 60, opacity: 0 });
+  ScrollTrigger.batch(".batch-card", {
+    start: "top 88%",
+    onEnter: (els) => gsap.to(els, { y: 0, opacity: 1, stagger: 0.12, overwrite: true }),
+    onLeaveBack: (els) => gsap.to(els, { y: 60, opacity: 0, stagger: 0.06, overwrite: true })
+  });
+});
+
+// build batch cards (needs to exist even if reduced motion -> just show them)
+(function buildBatch() {
+  const grid = document.getElementById("batchGrid");
+  for (let i = 1; i <= 8; i++) {
+    const c = document.createElement("div");
+    c.className = "batch-card";
+    c.textContent = String(i).padStart(2, "0");
+    grid.appendChild(c);
+  }
+})();
+
+/* =====================================================
+   04 · HORIZONTAL SCROLL — containerAnimation pattern
+   ===================================================== */
+mm.add("(min-width: 861px) and (prefers-reduced-motion: no-preference)", () => {
+  const track = document.getElementById("hTrack");
+  const getShift = () => track.scrollWidth - window.innerWidth;
+
+  const horiz = gsap.to(track, {
+    x: () => -getShift(),
+    ease: "none", // REQUIRED for 1:1 scroll mapping
+    scrollTrigger: {
+      trigger: "#hSection",
+      pin: true,
+      scrub: 1,
+      start: "top top",
+      end: () => "+=" + getShift(),
+      invalidateOnRefresh: true
+    }
+  });
+
+  // nested trigger driven by horizontal movement (containerAnimation)
+  gsap.utils.toArray(".h-panel .idx").forEach((idx) => {
+    gsap.from(idx, {
+      y: 80, opacity: 0, duration: 0.6,
+      scrollTrigger: {
+        trigger: idx,
+        containerAnimation: horiz,
+        start: "left 75%",
+        toggleActions: "play none none reverse"
+      }
+    });
+  });
+
+  return () => horiz.scrollTrigger && horiz.scrollTrigger.kill();
+});
+
+/* =====================================================
+   05 · SPLITTEXT — chars / words / lines+mask on scroll
+   ===================================================== */
+document.fonts.ready.then(() => {
+  mm.add("(prefers-reduced-motion: no-preference)", () => {
+    document.querySelectorAll("[data-split]").forEach((el) => {
+      const mode = el.dataset.split; // chars | words | lines
+      const opts = { type: mode === "lines" ? "lines" : (mode === "words" ? "words" : "chars") };
+      if (mode === "lines") opts.mask = "lines";
+      if (mode === "chars") opts.type = "words,chars";
+
+      const split = new SplitText(el, opts);
+      const units = split[mode] || split.chars;
+
+      gsap.from(units, {
+        yPercent: mode === "chars" ? 0 : 110,
+        y: mode === "chars" ? 24 : 0,
+        opacity: 0,
+        rotationX: mode === "chars" ? -60 : 0,
+        transformOrigin: "0% 50% -40",
+        stagger: mode === "lines" ? 0.12 : (mode === "words" ? 0.06 : 0.018),
+        duration: 0.7,
+        ease: "power3.out",
+        scrollTrigger: { trigger: el, start: "top 82%", toggleActions: "play none none reverse" }
+      });
+    });
+  });
+});
+
+/* =====================================================
+   06 · DRAGGABLE + INERTIA — throwable cards
+   ===================================================== */
+(function dragDemo() {
+  const arena = document.getElementById("dragArena");
+  const cards = [
+    { n: "x,y", t: "FREE DRAG", c: "var(--line)", x: 28, y: 40 },
+    { n: "↗", t: "THROW", c: "var(--signal)", x: 200, y: 70 },
+    { n: "⤺", t: "BOUNCE", c: "#E8EDF2", x: 380, y: 150 }
+  ];
+  cards.forEach((card) => {
+    const el = document.createElement("div");
+    el.className = "drag-card";
+    el.innerHTML = `<div class="n">${card.n}</div><div class="t">${card.t}</div>
+                    <div class="swatch" style="background:${card.c}"></div>`;
+    gsap.set(el, { x: card.x, y: card.y, rotation: gsap.utils.random(-6, 6) });
+    arena.appendChild(el);
+  });
+
+  Draggable.create(".drag-card", {
+    type: "x,y",
+    bounds: arena,
+    inertia: true,            // momentum after release (InertiaPlugin)
+    edgeResistance: 0.65,
+    onPressInit() { gsap.to(this.target, { scale: 1.06, duration: 0.2 }); },
+    onRelease() { gsap.to(this.target, { scale: 1, duration: 0.3 }); },
+    onDrag() { gsap.set(this.target, { rotation: this.deltaX * 0.4 }); },
+    onThrowUpdate() { gsap.set(this.target, { rotation: this.deltaX * 0.2 }); }
+  });
+})();
+
+/* =====================================================
+   07 · FLIP — filter + grid/list layout transition
+   ===================================================== */
+(function flipDemo() {
+  const grid = document.getElementById("flipGrid");
+  const tags = ["a", "b", "c"];
+  // build 9 items
+  for (let i = 1; i <= 9; i++) {
+    const tag = tags[(i - 1) % 3];
+    const item = document.createElement("div");
+    item.className = "flip-item tag-" + tag;
+    item.dataset.tag = tag;
+    item.innerHTML = `${String(i).padStart(2, "0")}<span class="dot"></span>`;
+    grid.appendChild(item);
+  }
+  const items = gsap.utils.toArray(".flip-item");
+
+  function flip(mutate) {
+    const state = Flip.getState(items);
+    mutate();
+    Flip.from(state, {
+      duration: 0.55, ease: "power2.inOut", absolute: true,
+      stagger: 0.04,
+      onEnter: (els) => gsap.fromTo(els, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4 }),
+      onLeave: (els) => gsap.to(els, { opacity: 0, scale: 0.7, duration: 0.3 })
+    });
+  }
+
+  // filter buttons
+  document.querySelectorAll("[data-filter]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-filter]").forEach(b => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      const f = btn.dataset.filter;
+      flip(() => {
+        items.forEach((it) => {
+          const show = f === "all" || it.dataset.tag === f;
+          it.style.display = show ? "" : "none";
+        });
+      });
+    });
+  });
+
+  // grid <-> list toggle
+  document.getElementById("flipLayout").addEventListener("click", () => {
+    flip(() => grid.classList.toggle("is-list"));
+  });
+})();
+
+/* keep everything aligned after late layout shifts */
+window.addEventListener("load", () => ScrollTrigger.refresh());
+</script>
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MOTION SPECIMEN II — GSAP 進階標本表</title>
+<meta name="description" content="GSAP 進階方向：MotionPath、DrawSVG、MorphSVG、ScrollSmoother 的本機示範。" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --ink:#0E1116; --panel:#161B22; --panel-2:#1C232C;
+    --line:#00E0C6; --signal:#FF5C38;
+    --grid:rgba(255,255,255,0.055); --grid-bold:rgba(255,255,255,0.10);
+    --hi:#E8EDF2; --lo:#8A95A3; --hairline:rgba(255,255,255,0.12);
+    --rail:84px;
+    --display:"Space Grotesk",system-ui,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --body:"Inter",system-ui,sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:var(--ink); color:var(--hi); font-family:var(--body); line-height:1.5;
+    overflow-x:hidden;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:32px 32px;
+  }
+  ::selection { background:var(--signal); color:#fff; }
+
+  /* rail (fixed -> must live OUTSIDE the smooth-wrapper) */
+  .rail {
+    position:fixed; left:0; top:0; bottom:0; width:var(--rail);
+    border-right:1px solid var(--hairline); background:rgba(14,17,22,0.72);
+    backdrop-filter:blur(6px); z-index:50;
+    display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+    padding:18px 0;
+  }
+  .rail__mark { font-family:var(--mono); font-size:11px; letter-spacing:.14em; color:var(--lo);
+    writing-mode:vertical-rl; text-orientation:mixed; }
+  .rail__mark--top { color:var(--hi); }
+  .rail__progwrap { flex:1; width:2px; margin:18px 0; background:var(--grid-bold);
+    position:relative; border-radius:2px; overflow:hidden; }
+  .rail__prog { position:absolute; inset:0; background:linear-gradient(var(--line),var(--signal));
+    transform:scaleY(0); transform-origin:top; }
+  .rail__dot { width:8px; height:8px; border-radius:50%; background:var(--line); box-shadow:0 0 12px var(--line); }
+
+  /* back link (fixed, outside wrapper) */
+  .backlink {
+    position:fixed; right:18px; top:16px; z-index:60;
+    font-family:var(--mono); font-size:12px; letter-spacing:.12em; color:var(--lo);
+    text-decoration:none; border:1px solid var(--hairline); border-radius:999px;
+    padding:8px 16px; background:rgba(14,17,22,0.7); backdrop-filter:blur(6px);
+  }
+  .backlink:hover { color:var(--line); border-color:var(--line); }
+
+  .shell { margin-left:var(--rail); }
+  section {
+    position:relative; padding:clamp(72px,11vh,140px) clamp(20px,6vw,96px);
+    border-bottom:1px solid var(--hairline);
+  }
+  .eyebrow { font-family:var(--mono); font-size:12px; letter-spacing:.32em; text-transform:uppercase;
+    color:var(--line); display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+  .eyebrow::before { content:""; width:28px; height:1px; background:var(--line); }
+  .eyebrow .no { color:var(--signal); }
+  h2 { font-family:var(--display); font-weight:700; font-size:clamp(28px,4.4vw,56px);
+    line-height:1.02; letter-spacing:-.02em; margin-bottom:16px; }
+  .lede { max-width:60ch; color:var(--lo); font-size:clamp(15px,1.4vw,18px); margin-bottom:40px; }
+  .lede b { color:var(--hi); font-weight:500; }
+  code { font-family:var(--mono); font-size:.92em; color:var(--line);
+    background:rgba(0,224,198,0.08); padding:1px 6px; border-radius:4px; }
+
+  /* hero */
+  .hero { min-height:88vh; display:flex; flex-direction:column; justify-content:center;
+    padding:clamp(80px,12vh,160px) clamp(20px,6vw,96px); border-bottom:1px solid var(--hairline); }
+  .hero h1 { font-family:var(--display); font-weight:700; font-size:clamp(44px,9vw,128px);
+    line-height:.92; letter-spacing:-.04em; }
+  .hero h1 em { font-style:normal; color:var(--line); }
+  .hero p { max-width:52ch; color:var(--lo); font-size:clamp(15px,1.5vw,19px); margin-top:26px; }
+  .hero .meta { display:flex; gap:28px; margin-top:32px; font-family:var(--mono); font-size:12px;
+    letter-spacing:.1em; color:var(--lo); flex-wrap:wrap; }
+  .hero .meta b { color:var(--signal); font-weight:500; }
+  /* parallax floaters driven by ScrollSmoother data-speed */
+  .floater { position:absolute; border-radius:50%; pointer-events:none; filter:blur(1px); opacity:.5; }
+  .f1 { width:160px; height:160px; background:rgba(0,224,198,0.12); top:14%; right:10%; }
+  .f2 { width:90px; height:90px; border:1px solid var(--signal); top:62%; right:26%; }
+  .f3 { width:50px; height:50px; background:rgba(255,92,56,0.16); top:30%; left:40%; }
+
+  .stage { border:1px solid var(--hairline); border-radius:12px; background:var(--panel);
+    position:relative; overflow:hidden; }
+  .stage svg { width:100%; height:auto; display:block; }
+  .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:0 0 26px; }
+  .btn { font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:var(--hi);
+    background:var(--panel); border:1px solid var(--hairline); border-radius:6px;
+    padding:9px 16px; cursor:pointer; transition:all .18s; }
+  .btn:hover { border-color:var(--line); color:var(--line); }
+  .btn.is-active { background:var(--line); color:var(--ink); border-color:var(--line); }
+  .readout { font-family:var(--mono); font-size:12px; color:var(--lo); }
+  .readout b { color:var(--signal); }
+
+  /* MotionPath */
+  .traveler { font-size:26px; }
+  .mp-note { font-family:var(--mono); font-size:11px; letter-spacing:.16em; color:var(--lo);
+    margin-top:14px; }
+
+  /* footer */
+  footer { padding:64px clamp(20px,6vw,96px) 96px; display:flex; justify-content:space-between;
+    align-items:flex-end; flex-wrap:wrap; gap:24px; }
+  footer .big { font-family:var(--display); font-weight:700; font-size:clamp(28px,5vw,64px);
+    letter-spacing:-.03em; line-height:1; }
+  footer .metaf { font-family:var(--mono); font-size:12px; color:var(--lo); letter-spacing:.08em; text-align:right; }
+  footer a { color:var(--line); text-decoration:none; }
+  footer a:hover { text-decoration:underline; }
+
+  a:focus-visible, button:focus-visible { outline:2px solid var(--line); outline-offset:3px; }
+
+  @media (max-width:860px) { :root { --rail:56px; } }
+</style>
+</head>
+<body>
+
+<!-- fixed chrome lives OUTSIDE #smooth-wrapper (ScrollSmoother requirement) -->
+<aside class="rail" aria-hidden="true">
+  <div class="rail__mark rail__mark--top">GSAP&nbsp;·&nbsp;ADV</div>
+  <div class="rail__progwrap"><div class="rail__prog" id="railProg"></div></div>
+  <div class="rail__dot"></div>
+  <div class="rail__mark">SHEET&nbsp;II</div>
+</aside>
+<a class="backlink" href="index.html" style="right: 160px;">← 標本表 I</a>
+<a class="backlink" href="skills-demo.html" style="border-color: var(--line); color: var(--line);">AI 技能展示 &rarr;</a>
+
+<div id="smooth-wrapper">
+  <div id="smooth-content">
+    <div class="shell">
+
+      <!-- HERO -->
+      <header class="hero" id="top">
+        <div class="floater f1" data-speed="0.7"></div>
+        <div class="floater f2" data-speed="1.3"></div>
+        <div class="floater f3" data-speed="1.6"></div>
+        <h1>Beyond<br>the <em>basics.</em></h1>
+        <p>
+          第二張標本表，收錄 GSAP 的進階方向：沿路徑飛行、線條自我描繪、圖形變形，
+          整頁還用 <b>ScrollSmoother</b> 做了平滑捲動——你現在捲動的手感本身就是一個 demo。
+        </p>
+        <div class="meta">
+          <span>MOTIONPATH</span><span>DRAWSVG</span><span>MORPHSVG</span><span>SCROLLSMOOTHER</span>
+        </div>
+      </header>
+
+      <!-- A1 · MOTIONPATH -->
+      <section id="a1">
+        <div class="eyebrow"><span class="no">08</span> MotionPath</div>
+        <h2>沿著一條路徑飛行。</h2>
+        <p class="lede">
+          <code>MotionPathPlugin</code> 讓任何元素沿 SVG 路徑移動，<code>autoRotate</code>
+          會自動讓它朝向前進方向。下方上面那台持續繞圈，<b>下面那台由你的捲動驅動</b>（scrub）。
+        </p>
+
+        <div class="stage" style="padding:8px;">
+          <svg viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet">
+            <path id="loopPath" d="M40,180 C120,40 220,40 300,120 S480,220 560,70"
+                  fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="2" stroke-dasharray="4 6"/>
+            <circle id="loopTraveler" r="9" fill="var(--line)"/>
+          </svg>
+        </div>
+        <div class="mp-note">↑ duration:6 · repeat:-1 · ease:"none" · autoRotate</div>
+
+        <div class="stage" style="padding:8px; margin-top:20px;">
+          <svg viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet">
+            <path id="scrollPath" d="M30,60 C160,20 200,220 320,160 S520,40 570,180"
+                  fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="2"/>
+            <g id="scrollTraveler">
+              <polygon points="0,-11 13,0 0,11 4,0" fill="var(--signal)"/>
+            </g>
+          </svg>
+        </div>
+        <div class="mp-note">↓ 由捲動位置驅動 · scrub:1 — 慢慢往下捲，它就沿路徑前進</div>
+      </section>
+
+      <!-- A2 · DRAWSVG -->
+      <section id="a2">
+        <div class="eyebrow"><span class="no">09</span> DrawSVG</div>
+        <h2>線條，自己畫出來。</h2>
+        <p class="lede">
+          <code>DrawSVGPlugin</code> 透過動畫 stroke 把線條「畫」出來或「擦」掉，
+          很適合路線圖、簽名、流程圖。下面這張路線圖會隨你捲動逐段描繪，節點依序亮起。
+        </p>
+        <div class="stage" style="padding:18px;">
+          <svg viewBox="0 0 600 260" preserveAspectRatio="xMidYMid meet">
+            <path id="route"
+              d="M40,210 L150,210 L150,90 L300,90 L300,180 L450,180 L450,60 L560,60"
+              fill="none" stroke="var(--line)" stroke-width="3"
+              stroke-linecap="round" stroke-linejoin="round"/>
+            <g id="nodes" fill="var(--signal)">
+              <circle cx="40"  cy="210" r="7"/>
+              <circle cx="150" cy="90"  r="7"/>
+              <circle cx="300" cy="180" r="7"/>
+              <circle cx="450" cy="60"  r="7"/>
+              <circle cx="560" cy="60"  r="7"/>
+            </g>
+          </svg>
+        </div>
+        <div class="mp-note">drawSVG: 0 → 100% · scrub · 節點用 stagger 依序 pop</div>
+      </section>
+
+      <!-- A3 · MORPHSVG -->
+      <section id="a3">
+        <div class="eyebrow"><span class="no">10</span> MorphSVG</div>
+        <h2>一個形狀，變成另一個。</h2>
+        <p class="lede">
+          <code>MorphSVGPlugin</code> 直接補間 SVG 的 <code>d</code> 路徑資料，起點和終點
+          就算點數不同也能平滑變形。點下面的形狀切換，或讓它自己輪播。
+        </p>
+        <div class="controls" id="morphBtns">
+          <button class="btn is-active" data-shape="0">■ Square</button>
+          <button class="btn" data-shape="1">◆ Diamond</button>
+          <button class="btn" data-shape="2">▲ Triangle</button>
+          <button class="btn" data-shape="3">✚ Cross</button>
+          <span style="flex:1"></span>
+          <button class="btn" id="morphAuto" aria-pressed="true">⟳ Auto</button>
+        </div>
+        <div class="stage" style="display:grid; place-items:center; padding:30px;">
+          <svg viewBox="0 0 100 100" width="220" height="220">
+            <path id="morph" d="M20,20 H80 V80 H20 Z" fill="var(--line)"/>
+          </svg>
+        </div>
+      </section>
+
+      <!-- A4 · SCROLLSMOOTHER -->
+      <section id="a4">
+        <div class="eyebrow"><span class="no">11</span> ScrollSmoother</div>
+        <h2>連捲動本身都能調味。</h2>
+        <p class="lede">
+          <code>ScrollSmoother</code> 把原生捲動包成帶慣性的平滑捲動，再用 <code>data-speed</code>
+          /<code>data-lag</code> 讓元素以不同速度移動，做出深度視差。這整頁就跑在它上面——
+          Hero 的圓圈、下面這幾塊都用了不同 speed。
+        </p>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+          <div class="stage" style="height:180px; display:grid; place-items:center;" data-speed="0.85">
+            <span style="font-family:var(--mono); color:var(--lo); font-size:12px;">data-speed 0.85</span>
+          </div>
+          <div class="stage" style="height:180px; display:grid; place-items:center;" data-speed="1.1">
+            <span style="font-family:var(--mono); color:var(--lo); font-size:12px;">data-speed 1.1</span>
+          </div>
+          <div class="stage" style="height:180px; display:grid; place-items:center;" data-speed="1.35">
+            <span style="font-family:var(--mono); color:var(--lo); font-size:12px;">data-speed 1.35</span>
+          </div>
+        </div>
+        <div class="mp-note" style="margin-top:16px;">smooth:1.4 · effects:true — 數字越大，捲動時移動越快</div>
+      </section>
+
+      <footer>
+        <div class="big">11 specimens<br>across 2 sheets.</div>
+        <div class="metaf">
+          ADVANCED: MOTIONPATH · DRAWSVG · MORPHSVG · SCROLLSMOOTHER<br>
+          DOCS — <a href="https://gsap.com/docs/v3/Plugins/" target="_blank" rel="noopener">gsap.com/docs/v3/Plugins</a><br>
+          <a href="index.html">← 回標本表 I</a> &nbsp;·&nbsp; <a href="#top">↑ TOP</a>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+</div>
+
+<!-- GSAP + advanced plugins -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollSmoother.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/MotionPathPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/MorphSVGPlugin.min.js"></script>
+
+<script>
+gsap.registerPlugin(ScrollTrigger, ScrollSmoother, MotionPathPlugin, DrawSVGPlugin, MorphSVGPlugin);
+gsap.defaults({ ease: "power2.out" });
+
+const mm = gsap.matchMedia();
+
+/* rail progress (native scroll fallback works too) */
+gsap.to("#railProg", { scaleY: 1, ease: "none",
+  scrollTrigger: { start: 0, end: "max", scrub: 0.3 } });
+
+/* =====================================================
+   A4 · SCROLLSMOOTHER — wrap the whole page (no reduced motion)
+   Must be created before scroll-driven triggers rely on it.
+   ===================================================== */
+mm.add("(prefers-reduced-motion: no-preference)", () => {
+  const smoother = ScrollSmoother.create({
+    wrapper: "#smooth-wrapper",
+    content: "#smooth-content",
+    smooth: 1.4,
+    effects: true,          // enables data-speed / data-lag
+    normalizeScroll: true
+  });
+  return () => smoother.kill();
+});
+
+/* =====================================================
+   A1 · MOTIONPATH — looping traveler + scroll-driven traveler
+   ===================================================== */
+mm.add("(prefers-reduced-motion: no-preference)", () => {
+  const loop = gsap.to("#loopTraveler", {
+    duration: 6, repeat: -1, ease: "none",
+    motionPath: { path: "#loopPath", align: "#loopPath", alignOrigin: [0.5, 0.5], autoRotate: true }
+  });
+
+  const scrollMP = gsap.to("#scrollTraveler", {
+    ease: "none",
+    motionPath: { path: "#scrollPath", align: "#scrollPath", alignOrigin: [0.5, 0.5], autoRotate: true },
+    scrollTrigger: { trigger: "#a1", start: "top 65%", end: "bottom 70%", scrub: 1 }
+  });
+
+  return () => { loop.kill(); scrollMP.scrollTrigger && scrollMP.scrollTrigger.kill(); };
+});
+
+/* =====================================================
+   A2 · DRAWSVG — route draws on scroll, nodes pop in order
+   ===================================================== */
+// default (incl. reduced motion): route + nodes fully visible.
+mm.add("(prefers-reduced-motion: no-preference)", () => {
+  gsap.set("#nodes circle", { scale: 0, transformOrigin: "50% 50%" });
+  const tl = gsap.timeline({
+    scrollTrigger: { trigger: "#a2", start: "top 70%", end: "bottom 65%", scrub: 0.8 }
+  });
+  tl.from("#route", { drawSVG: 0, ease: "none" })
+    .to("#nodes circle", { scale: 1, stagger: 0.25, ease: "back.out(2)" }, 0.1);
+  return () => tl.scrollTrigger && tl.scrollTrigger.kill();
+});
+
+/* =====================================================
+   A3 · MORPHSVG — cycle between shapes (buttons + auto)
+   ===================================================== */
+(function morphDemo() {
+  const shapes = [
+    "M20,20 H80 V80 H20 Z",                              // square
+    "M50,8 L92,50 L50,92 L8,50 Z",                       // diamond
+    "M50,10 L90,84 L10,84 Z",                            // triangle
+    "M40,12 H60 V40 H88 V60 H60 V88 H40 V60 H12 V40 H40 Z" // cross
+  ];
+  const btns = gsap.utils.toArray("#morphBtns [data-shape]");
+  let current = 0;
+  let auto = true;
+  let call;
+
+  function go(i) {
+    current = i;
+    btns.forEach((b, bi) => b.classList.toggle("is-active", bi === i));
+    gsap.to("#morph", { duration: 0.8, morphSVG: shapes[i], ease: "power2.inOut" });
+  }
+  function tick() {
+    if (!auto) return;
+    go((current + 1) % shapes.length);
+    call = gsap.delayedCall(1.4, tick);
+  }
+
+  btns.forEach((b, i) => b.addEventListener("click", () => {
+    auto = false;
+    document.getElementById("morphAuto").setAttribute("aria-pressed", "false");
+    document.getElementById("morphAuto").classList.remove("is-active");
+    call && call.kill();
+    go(i);
+  }));
+
+  const autoBtn = document.getElementById("morphAuto");
+  autoBtn.classList.add("is-active");
+  autoBtn.addEventListener("click", () => {
+    auto = !auto;
+    autoBtn.setAttribute("aria-pressed", String(auto));
+    autoBtn.classList.toggle("is-active", auto);
+    call && call.kill();
+    if (auto) tick();
+  });
+
+  // start auto loop after a beat
+  call = gsap.delayedCall(1.4, tick);
+})();
+
+window.addEventListener("load", () => ScrollTrigger.refresh());
+</script>
+</body>
+</html>
