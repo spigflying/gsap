@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NEUROSPHERE — 神經介面 · 六個動態 SVG 廣告模組</title>
   <meta name="description"
-    content="NEUROSPHERE 神經介面六個畫面，全用動態 SVG 實作，並套上廣告模組卡片樣式與 GSAP 捲動進場：登入光環、神經活動、天氣洞察、腦波掃描、個人檔案、智慧家庭。" />
+    content="NEUROSPHERE 神經介面六個概念，每個都套上廣告模組格式：一外框、一行 AI 導讀、三個並排欄位，每欄一個動態 SVG，GSAP 捲動進場。" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -30,15 +30,8 @@
       --tc: "Noto Sans TC", system-ui, sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
     body {
       background: var(--ink);
@@ -51,387 +44,142 @@
         radial-gradient(circle at 85% 110%, rgba(70, 236, 255, 0.06), transparent 45%);
     }
 
-    ::selection {
-      background: var(--cyan);
-      color: #001014;
-    }
-
-    a {
-      color: var(--cyan);
-      text-decoration: none;
-    }
+    ::selection { background: var(--cyan); color: #001014; }
+    a { color: var(--cyan); text-decoration: none; }
 
     /* ---------- chrome ---------- */
-    .topbar {
-      position: fixed;
-      inset: 0 0 auto 0;
-      height: 3px;
-      z-index: 80;
-      background: rgba(70, 236, 255, 0.08);
-    }
-
+    .topbar { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 80; background: rgba(70, 236, 255, 0.08); }
     .topbar i {
-      display: block;
-      height: 100%;
-      width: 100%;
-      transform-origin: left;
-      transform: scaleX(0);
+      display: block; height: 100%; width: 100%;
+      transform-origin: left; transform: scaleX(0);
       background: linear-gradient(90deg, var(--line), var(--cyan));
       box-shadow: 0 0 12px var(--cyan);
     }
 
     .backlink {
-      position: fixed;
-      left: 18px;
-      top: 16px;
-      z-index: 80;
-      font-family: var(--mono);
-      font-size: 12px;
-      letter-spacing: .12em;
-      color: var(--lo);
-      border: 1px solid var(--hairline);
-      border-radius: 999px;
-      padding: 8px 16px;
-      background: rgba(7, 11, 16, 0.7);
-      backdrop-filter: blur(8px);
+      position: fixed; left: 18px; top: 16px; z-index: 80;
+      font-family: var(--mono); font-size: 12px; letter-spacing: .12em;
+      color: var(--lo); border: 1px solid var(--hairline); border-radius: 999px;
+      padding: 8px 16px; background: rgba(7, 11, 16, 0.7); backdrop-filter: blur(8px);
     }
-
-    .backlink:hover {
-      color: var(--cyan);
-      border-color: var(--cyan);
-    }
+    .backlink:hover { color: var(--cyan); border-color: var(--cyan); }
 
     .rail {
-      position: fixed;
-      right: 22px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 80;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+      position: fixed; right: 22px; top: 50%; transform: translateY(-50%);
+      z-index: 80; display: flex; flex-direction: column; gap: 14px;
     }
+    .rail a { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--hairline); }
+    .rail a.on, .rail a:hover { border-color: var(--cyan); background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+    @media (max-width: 720px) { .rail { display: none; } }
 
-    .rail a {
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      border: 1px solid var(--hairline);
-    }
-
-    .rail a.on,
-    .rail a:hover {
-      border-color: var(--cyan);
-      background: var(--cyan);
-      box-shadow: 0 0 10px var(--cyan);
-    }
-
-    @media (max-width: 720px) {
-      .rail { display: none; }
-    }
-
-    .wrap {
-      max-width: 840px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
+    .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
 
     /* ---------- hero ---------- */
-    .intro {
-      min-height: 76vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
+    .intro { min-height: 76vh; display: flex; flex-direction: column; justify-content: center; }
     .intro .kicker {
-      font-family: var(--mono);
-      font-size: 12px;
-      letter-spacing: .34em;
-      text-transform: uppercase;
-      color: var(--cyan);
-      margin-bottom: 20px;
+      font-family: var(--mono); font-size: 12px; letter-spacing: .34em;
+      text-transform: uppercase; color: var(--cyan); margin-bottom: 20px;
     }
-
     .intro h1 {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: clamp(40px, 8vw, 100px);
-      line-height: .94;
-      letter-spacing: -.03em;
+      font-family: var(--display); font-weight: 700;
+      font-size: clamp(40px, 8vw, 100px); line-height: .94; letter-spacing: -.03em;
     }
-
-    .intro h1 em {
-      font-style: normal;
-      color: var(--cyan);
-      text-shadow: 0 0 30px rgba(70, 236, 255, .4);
-    }
-
-    .intro p {
-      max-width: 48ch;
-      color: var(--lo);
-      font-size: clamp(15px, 1.5vw, 18px);
-      margin-top: 24px;
-    }
-
-    .intro .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 30px;
-    }
-
+    .intro h1 em { font-style: normal; color: var(--cyan); text-shadow: 0 0 30px rgba(70, 236, 255, .4); }
+    .intro p { max-width: 48ch; color: var(--lo); font-size: clamp(15px, 1.5vw, 18px); margin-top: 24px; }
+    .intro .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
     .intro .legend span {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: .1em;
-      color: var(--lo);
-      border: 1px solid var(--hairline);
-      border-radius: 999px;
-      padding: 6px 13px;
+      font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--lo);
+      border: 1px solid var(--hairline); border-radius: 999px; padding: 6px 13px;
     }
 
-    /* ---------- one concept = one ad module = one scroll stop ---------- */
+    /* ---------- one concept = one ad module (one frame, three columns) ---------- */
     .ad-stop {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      perspective: 1500px;
-      padding: 64px 0;
+      min-height: 100vh; display: flex; align-items: center;
+      perspective: 1500px; padding: 64px 0;
     }
 
     .ad {
-      position: relative;
-      width: 100%;
+      position: relative; width: 100%;
       background: linear-gradient(180deg, var(--panel), var(--panel-2));
-      border: 1px solid var(--hairline);
-      border-radius: 18px;
+      border: 1px solid var(--hairline); border-radius: 18px;
       padding: clamp(24px, 4vw, 44px);
       transform-style: preserve-3d;
       box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 0 70px rgba(70, 236, 255, 0.03);
       overflow: hidden;
     }
 
-    /* corner accent — the ad-module signature */
+    /* the corner accent — ad-module signature */
     .ad::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 60px;
-      height: 60px;
-      border-top: 2px solid var(--line);
-      border-left: 2px solid var(--line);
-      border-top-left-radius: 18px;
-      opacity: .6;
+      content: ""; position: absolute; left: 0; top: 0;
+      width: 60px; height: 60px;
+      border-top: 2px solid var(--line); border-left: 2px solid var(--line);
+      border-top-left-radius: 18px; opacity: .6;
     }
 
     .ad__badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: var(--signal);
-      margin-bottom: 18px;
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: var(--mono); font-size: 11px; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--signal); margin-bottom: 18px;
     }
-
-    .ad__badge .no {
-      color: var(--lo);
-    }
+    .ad__badge .no { color: var(--lo); }
 
     .ad__title {
-      font-family: var(--tc);
-      font-weight: 700;
-      font-size: clamp(20px, 2.8vw, 30px);
-      line-height: 1.35;
-      letter-spacing: -.01em;
-      margin-bottom: 24px;
-      max-width: 28ch;
+      font-family: var(--tc); font-weight: 700;
+      font-size: clamp(20px, 2.8vw, 30px); line-height: 1.35; letter-spacing: -.01em;
+      margin-bottom: 26px; max-width: 30ch;
     }
+    .ad__title .lead { color: var(--cyan); text-shadow: 0 0 22px rgba(70, 236, 255, .25); }
 
-    .ad__title .lead {
-      color: var(--cyan);
-      text-shadow: 0 0 22px rgba(70, 236, 255, .25);
-    }
+    /* three side-by-side columns */
+    .ad__rows { display: flex; flex-direction: row; gap: 14px; transform-style: preserve-3d; }
 
-    /* the SVG stage inside the card */
-    .ad__stage {
-      position: relative;
+    .ad__row {
+      flex: 1 1 0; min-width: 0; position: relative; overflow: hidden;
+      background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--hairline);
+      border-top: 3px solid var(--line);
       border-radius: 12px;
-      background:
-        radial-gradient(circle at 50% 0%, rgba(70, 236, 255, 0.05), transparent 60%),
-        rgba(255, 255, 255, 0.015);
-      padding: clamp(16px, 3vw, 28px);
+      padding: 16px 16px 18px;
+    }
+    .ad__row:nth-child(2) { border-top-color: var(--signal); }
+    .ad__row:nth-child(3) { border-top-color: var(--hi); }
+
+    @media (max-width: 720px) {
+      .ad__rows { flex-direction: column; }
     }
 
-    .ad__stage svg {
-      display: block;
-      width: 100%;
-      max-width: 560px;
-      height: auto;
-      margin: 0 auto;
-      overflow: visible;
+    /* a column = a small animated SVG cell + heading + text */
+    .cell {
+      display: block; width: 100%; height: 96px; overflow: visible; margin-bottom: 12px;
     }
 
-    /* technique tags — echoes the ad-module legend chips */
-    .ad__tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 18px;
+    .cell-h {
+      font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+      color: var(--cyan); display: flex; align-items: center; gap: 8px; margin-bottom: 5px;
     }
+    .ad__row:nth-child(2) .cell-h { color: var(--signal); }
+    .ad__row:nth-child(3) .cell-h { color: var(--hi); }
+    .cell-h .n { color: var(--lo); }
 
-    .ad__tags span {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: .12em;
-      color: var(--lo);
-      border: 1px solid var(--hairline);
-      border-radius: 999px;
-      padding: 5px 11px;
-    }
+    .cell-t { font-size: 13px; line-height: 1.5; color: var(--lo); }
 
     /* ---------- SVG shared styles ---------- */
-    .stroke {
-      fill: none;
-      stroke: var(--line);
-      stroke-width: 1.5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
+    .stroke { fill: none; stroke: var(--line); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
     .stroke.cyan { stroke: var(--cyan); }
     .stroke.signal { stroke: var(--signal); }
     .stroke.dim { stroke: var(--hairline); }
-    .glow { filter: drop-shadow(0 0 4px var(--cyan)); }
+    .stroke.hi { stroke: var(--hi); }
+    .glow { filter: drop-shadow(0 0 3px var(--cyan)); }
+    .mono-s { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; fill: var(--lo); }
 
-    .mono-label {
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: .14em;
-      fill: var(--lo);
-    }
-
-    /* ---------- mock UI bits ---------- */
-    .stage-ui {
-      max-width: 420px;
-      margin: 20px auto 0;
-    }
-
-    .ui-field {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border: 1px solid var(--hairline);
-      border-radius: 10px;
-      padding: 12px 14px;
-      margin-top: 12px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--lo);
-      background: rgba(70, 236, 255, 0.03);
-    }
-
-    .ui-field .ico {
-      width: 14px;
-      height: 14px;
-      border-radius: 3px;
-      border: 1px solid var(--cyan);
-      flex-shrink: 0;
-    }
-
-    .ui-btn {
-      margin-top: 16px;
-      width: 100%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-family: var(--mono);
-      font-size: 12px;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--ink);
-      background: var(--cyan);
-      border: none;
-      border-radius: 999px;
-      padding: 13px 24px;
-      cursor: pointer;
-      box-shadow: 0 0 24px rgba(70, 236, 255, 0.35);
-    }
-
-    .ui-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 13px 4px;
-      border-bottom: 1px solid rgba(70, 236, 255, 0.08);
-      font-size: 14px;
-    }
-
-    .ui-row:last-child { border-bottom: none; }
-
-    .ui-row small {
-      display: block;
-      color: var(--lo);
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: .1em;
-      margin-top: 2px;
-    }
-
-    .tgl {
-      width: 46px;
-      height: 24px;
-      border-radius: 999px;
-      border: 1px solid var(--hairline);
-      background: rgba(70, 236, 255, 0.05);
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .tgl .knob {
-      position: absolute;
-      left: 3px;
-      top: 50%;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--lo);
-      transform: translate(0, -50%);
-    }
-
-    footer {
-      padding: 90px 0 120px;
-      text-align: center;
-      color: var(--lo);
-    }
-
+    footer { padding: 90px 0 120px; text-align: center; color: var(--lo); }
     footer .big {
-      font-family: var(--display);
-      font-weight: 700;
-      color: var(--hi);
-      font-size: clamp(24px, 4vw, 40px);
-      letter-spacing: -.02em;
-      margin-bottom: 16px;
+      font-family: var(--display); font-weight: 700; color: var(--hi);
+      font-size: clamp(24px, 4vw, 40px); letter-spacing: -.02em; margin-bottom: 16px;
     }
+    footer .metaf { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; }
 
-    footer .metaf {
-      font-family: var(--mono);
-      font-size: 12px;
-      letter-spacing: .08em;
-    }
-
-    a:focus-visible,
-    button:focus-visible {
-      outline: 2px solid var(--cyan);
-      outline-offset: 3px;
-    }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
   </style>
 </head>
 
@@ -453,13 +201,14 @@
     <!-- INTRO -->
     <header class="intro">
       <div class="kicker">Neurosphere · Ad Module Lab</div>
-      <h1>六個畫面，<br><em>一套</em>廣告模組。</h1>
+      <h1>一個外框，<br><em>三則</em>欄位。</h1>
       <p>
-        把 NEUROSPHERE 神經介面的六個概念,全部裝進廣告模組的卡片版型——深色漸層卡、左上框角、MODULE 徽章、AI 導讀標題,
-        <b style="color:var(--hi)">捲到畫面內才開始播</b>。每張卡的內容都是動態 SVG,進場輪流套用三則廣告模組的效果。
+        NEUROSPHERE 神經介面的六個概念，全部套上廣告模組的格式——一個外框、一行 AI 導讀、
+        <b style="color:var(--hi)">三個橫向並排的欄位</b>，每一欄都是一個會動的 SVG，
+        把概念拆成三則，捲到畫面內才開始播。
       </p>
       <div class="legend">
-        <span>01 · 登入光環</span><span>02 · 神經活動</span><span>03 · 天氣洞察</span>
+        <span>01 · 登入入口</span><span>02 · 神經活動</span><span>03 · 天氣洞察</span>
         <span>04 · 腦波掃描</span><span>05 · 個人檔案</span><span>06 · 智慧家庭</span>
       </div>
     </header>
@@ -468,52 +217,55 @@
     <section class="ad-stop" id="s1">
       <article class="ad" data-enter="flip3d">
         <div class="ad__badge"><span class="no">MODULE 01</span> · NEUROSPHERE / 登入入口</div>
-        <h2 class="ad__title"><span class="lead">AI 導讀：進入神經介面,同心光環自我描繪後解鎖。</span></h2>
-        <div class="ad__stage">
-          <svg id="svg1" viewBox="0 0 360 300" role="img" aria-label="神經介面光環">
-            <g id="s1-net" class="stroke dim" stroke-width="1">
-              <line x1="40" y1="60" x2="120" y2="110" />
-              <line x1="120" y1="110" x2="70" y2="190" />
-              <line x1="320" y1="70" x2="250" y2="120" />
-              <line x1="250" y1="120" x2="310" y2="210" />
-              <line x1="60" y1="250" x2="150" y2="250" />
-              <line x1="300" y1="250" x2="220" y2="220" />
-            </g>
-            <g id="s1-stars">
-              <circle cx="40" cy="60" r="2.4" fill="#46ECFF" />
-              <circle cx="120" cy="110" r="2" fill="#46ECFF" />
-              <circle cx="70" cy="190" r="2.4" fill="#46ECFF" />
-              <circle cx="320" cy="70" r="2" fill="#46ECFF" />
-              <circle cx="250" cy="120" r="2.4" fill="#46ECFF" />
-              <circle cx="310" cy="210" r="2" fill="#46ECFF" />
-              <circle cx="60" cy="250" r="2.4" fill="#46ECFF" />
-              <circle cx="300" cy="250" r="2" fill="#46ECFF" />
-              <circle cx="220" cy="220" r="2" fill="#46ECFF" />
-            </g>
-            <g class="glow">
-              <circle id="s1-r1" class="stroke" cx="180" cy="150" r="58" />
-              <circle id="s1-r2" class="stroke cyan" cx="180" cy="150" r="84" stroke-dasharray="6 10" />
-              <circle id="s1-r3" class="stroke dim" cx="180" cy="150" r="108" />
-              <path id="s1-arc" class="stroke signal" stroke-width="3" d="M180,42 A108,108 0 0 1 280,108" />
-              <g id="s1-ticks" class="stroke" stroke-width="1.5">
-                <line x1="180" y1="32" x2="180" y2="44" />
-                <line x1="180" y1="256" x2="180" y2="268" />
-                <line x1="62" y1="150" x2="74" y2="150" />
-                <line x1="286" y1="150" x2="298" y2="150" />
-              </g>
-            </g>
-            <text x="180" y="146" text-anchor="middle" font-family="Space Grotesk, sans-serif"
-              font-size="19" font-weight="700" letter-spacing="3" fill="#E8F4F6" id="s1-word">NEUROSPHERE</text>
-            <text x="180" y="166" text-anchor="middle" class="mono-label" id="s1-sub">NEURAL OS · v3.15</text>
-          </svg>
+        <h2 class="ad__title"><span class="lead">AI 導讀：進入神經介面，光環、星座、登入三步驟一氣呵成。</span></h2>
+        <div class="ad__rows">
 
-          <div class="stage-ui">
-            <div class="ui-field" data-login><span class="ico"></span>USERNAME</div>
-            <div class="ui-field" data-login><span class="ico"></span>············</div>
-            <button class="ui-btn" data-login>Enter the Neural Interface →</button>
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="同心光環">
+              <g class="glow">
+                <circle class="dr stroke cyan" cx="70" cy="46" r="15" />
+                <circle class="dr stroke dim" cx="70" cy="46" r="34" />
+                <path class="dr stroke signal" stroke-width="2.5" d="M70,12 A34,34 0 0 1 104,46" />
+              </g>
+              <circle id="s1a-spin" class="stroke cyan" cx="70" cy="46" r="24" stroke-dasharray="5 9" opacity="0.8" />
+            </svg>
+            <div class="cell-h"><span class="n">01</span> 同心光環</div>
+            <div class="cell-t">HUD 環自我描繪、反向旋轉,開機定位。</div>
           </div>
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="星座連線">
+              <g id="s1b-net" class="dr stroke dim" stroke-width="1.2">
+                <line x1="24" y1="26" x2="62" y2="50" />
+                <line x1="62" y1="50" x2="38" y2="78" />
+                <line x1="62" y1="50" x2="106" y2="34" />
+                <line x1="106" y1="34" x2="112" y2="74" />
+                <line x1="62" y1="50" x2="112" y2="74" />
+              </g>
+              <g id="s1b-stars" fill="#46ECFF">
+                <circle class="nd" cx="24" cy="26" r="3" />
+                <circle class="nd" cx="62" cy="50" r="3.5" />
+                <circle class="nd" cx="38" cy="78" r="3" />
+                <circle class="nd" cx="106" cy="34" r="3" />
+                <circle class="nd" cx="112" cy="74" r="3" />
+              </g>
+            </svg>
+            <div class="cell-h"><span class="n">02</span> 星座連線</div>
+            <div class="cell-t">背景節點一條條接通,織出神經網路。</div>
+          </div>
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="神經登入">
+              <rect class="dr stroke hi" x="46" y="34" width="48" height="40" rx="6" />
+              <path class="dr stroke hi" d="M56,34 v-8 a14,14 0 0 1 28,0 v8" />
+              <circle class="nd" cx="70" cy="52" r="4" fill="#E8F4F6" />
+              <line id="s1c-scan" class="stroke cyan" x1="50" y1="44" x2="90" y2="44" opacity="0.9" />
+            </svg>
+            <div class="cell-h"><span class="n">03</span> 神經登入</div>
+            <div class="cell-t">掃描驗證後解鎖,進入神經介面。</div>
+          </div>
+
         </div>
-        <div class="ad__tags"><span>RING SELF-DRAW</span><span>COUNTER-ROTATE</span><span>CONSTELLATION LINK</span></div>
       </article>
     </section>
 
@@ -521,50 +273,58 @@
     <section class="ad-stop" id="s2">
       <article class="ad" data-enter="depth">
         <div class="ad__badge"><span class="no">MODULE 02</span> · NEUROSPHERE / 神經活動</div>
-        <h2 class="ad__title"><span class="lead">AI 導讀：三種圖表同台,把神經活動讀成即時儀表。</span></h2>
-        <div class="ad__stage">
-          <svg id="svg2" viewBox="0 0 380 300" role="img" aria-label="神經活動儀表板">
-            <g id="s2-voice" transform="translate(46,46)">
-              <circle class="stroke dim" cx="0" cy="0" r="30" />
-              <g class="stroke cyan" stroke-width="2.5">
-                <line class="vb" x1="-14" y1="0" x2="-14" y2="0" />
-                <line class="vb" x1="-7" y1="0" x2="-7" y2="0" />
+        <h2 class="ad__title"><span class="lead">AI 導讀：聲波、神經折線、效能三組讀數,即時同台。</span></h2>
+        <div class="ad__rows">
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="聲波">
+              <circle class="dr stroke dim" cx="70" cy="48" r="30" />
+              <g id="s2a-voice" class="stroke cyan" stroke-width="3" transform="translate(70,48)">
+                <line class="vb" x1="-20" y1="0" x2="-20" y2="0" />
+                <line class="vb" x1="-10" y1="0" x2="-10" y2="0" />
                 <line class="vb" x1="0" y1="0" x2="0" y2="0" />
-                <line class="vb" x1="7" y1="0" x2="7" y2="0" />
-                <line class="vb" x1="14" y1="0" x2="14" y2="0" />
+                <line class="vb" x1="10" y1="0" x2="10" y2="0" />
+                <line class="vb" x1="20" y1="0" x2="20" y2="0" />
               </g>
-            </g>
-            <text x="86" y="38" class="mono-label">VOICE</text>
-            <text x="86" y="52" class="mono-label" fill="#46ECFF">● LISTENING</text>
+            </svg>
+            <div class="cell-h"><span class="n">01</span> 聲波 VOICE</div>
+            <div class="cell-t">即時收音,語音指令同步聆聽。</div>
+          </div>
 
-            <text x="30" y="96" class="mono-label">NEURAL ACTIVITY</text>
-            <rect x="28" y="104" width="324" height="92" rx="8" class="stroke dim" stroke-width="1" />
-            <clipPath id="s2-clip"><rect x="29" y="105" width="322" height="90" rx="8" /></clipPath>
-            <g clip-path="url(#s2-clip)">
-              <path id="s2-line" class="stroke cyan glow" stroke-width="2"
-                d="M30,170 L58,150 L86,162 L114,128 L142,150 L170,120 L198,148 L226,116 L254,142 L282,124 L310,156 L338,138 L366,160" />
-              <path id="s2-line2" class="stroke" stroke-width="1" opacity="0.35"
-                d="M30,180 L58,168 L86,176 L114,150 L142,166 L170,146 L198,168 L226,140 L254,160 L282,148 L310,172 L338,158 L366,176" />
-            </g>
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="神經折線">
+              <rect class="dr stroke dim" x="14" y="18" width="112" height="60" rx="6" stroke-width="1" />
+              <clipPath id="s2b-clip"><rect x="15" y="19" width="110" height="58" rx="6" /></clipPath>
+              <g clip-path="url(#s2b-clip)">
+                <path id="s2b-line" class="dr stroke cyan glow" stroke-width="2"
+                  d="M16,58 L34,44 L52,52 L70,30 L88,48 L106,32 L124,50" />
+                <path id="s2b-line2" class="stroke" stroke-width="1" opacity="0.3"
+                  d="M16,64 L34,54 L52,60 L70,44 L88,58 L106,46 L124,60" />
+              </g>
+            </svg>
+            <div class="cell-h"><span class="n">02</span> 神經折線</div>
+            <div class="cell-t">腦波即時繪製,描完後持續滾動。</div>
+          </div>
 
-            <text x="30" y="224" class="mono-label">PERFORMANCE</text>
-            <g id="s2-bars">
-              <rect class="bar" x="34" y="280" width="20" height="0" rx="2" fill="#00E0C6" />
-              <rect class="bar" x="64" y="280" width="20" height="0" rx="2" fill="#00E0C6" />
-              <rect class="bar" x="94" y="280" width="20" height="0" rx="2" fill="#00E0C6" />
-              <rect class="bar" x="124" y="280" width="20" height="0" rx="2" fill="#00E0C6" />
-              <rect class="bar" x="154" y="280" width="20" height="0" rx="2" fill="#FF5C38" />
-              <rect class="bar" x="184" y="280" width="20" height="0" rx="2" fill="#00E0C6" />
-            </g>
-            <g transform="translate(300,256)">
-              <circle class="stroke dim" cx="0" cy="0" r="26" stroke-width="5" />
-              <circle id="s2-donut" class="stroke cyan" cx="0" cy="0" r="26" stroke-width="5" transform="rotate(-90)" />
-              <text x="0" y="4" text-anchor="middle" class="mono-label" fill="#E8F4F6" id="s2-donut-val">0%</text>
-            </g>
-            <text x="248" y="232" class="mono-label">AI ANALYTICS</text>
-          </svg>
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="效能">
+              <g id="s2c-bars">
+                <rect class="bar" x="20" y="78" width="13" height="0" rx="2" fill="#00E0C6" />
+                <rect class="bar" x="40" y="78" width="13" height="0" rx="2" fill="#00E0C6" />
+                <rect class="bar" x="60" y="78" width="13" height="0" rx="2" fill="#FF5C38" />
+                <rect class="bar" x="80" y="78" width="13" height="0" rx="2" fill="#00E0C6" />
+              </g>
+              <g transform="translate(116,40)">
+                <circle class="stroke dim" cx="0" cy="0" r="18" stroke-width="4" />
+                <circle id="s2c-donut" class="stroke cyan" cx="0" cy="0" r="18" stroke-width="4" transform="rotate(-90)" />
+                <text x="0" y="3" text-anchor="middle" class="mono-s" fill="#E8F4F6" id="s2c-val">0%</text>
+              </g>
+            </svg>
+            <div class="cell-h"><span class="n">03</span> 效能 PERF</div>
+            <div class="cell-t">輸出量化追蹤,AI 分析數到 84%。</div>
+          </div>
+
         </div>
-        <div class="ad__tags"><span>LINE SELF-DRAW</span><span>BARS GROW</span><span>DONUT COUNT-UP</span></div>
       </article>
     </section>
 
@@ -572,39 +332,46 @@
     <section class="ad-stop" id="s3">
       <article class="ad" data-enter="clip">
         <div class="ad__badge"><span class="no">MODULE 03</span> · NEUROSPHERE / 天氣洞察</div>
-        <h2 class="ad__title"><span class="lead">AI 導讀：雷雨雲與雨絲,把環境資訊變成會呼吸的天氣。</span></h2>
-        <div class="ad__stage">
-          <svg id="svg3" viewBox="0 0 360 300" role="img" aria-label="天氣與時間洞察">
-            <g id="s3-weather" transform="translate(180,96)">
-              <path id="s3-cloud" class="stroke cyan glow" stroke-width="2"
-                d="M-58,18 a26,26 0 0 1 14,-50 a34,34 0 0 1 64,8 a22,22 0 0 1 4,42 Z" />
-              <path id="s3-bolt" class="stroke signal" stroke-width="3" fill="none"
-                d="M2,18 L-12,52 L4,52 L-10,86" />
-              <g id="s3-rain" class="stroke cyan" stroke-width="2" opacity="0.7">
-                <line x1="-40" y1="30" x2="-46" y2="46" />
-                <line x1="-20" y1="34" x2="-26" y2="50" />
-                <line x1="24" y1="32" x2="18" y2="48" />
-                <line x1="44" y1="30" x2="38" y2="46" />
+        <h2 class="ad__title"><span class="lead">AI 導讀：雷雨雲、閃電、時間洞察,把環境讀成三則天氣。</span></h2>
+        <div class="ad__rows">
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="雷雨雲">
+              <g transform="translate(70,40)">
+                <path class="dr stroke cyan glow" stroke-width="2"
+                  d="M-34,12 a16,16 0 0 1 8,-30 a20,20 0 0 1 38,5 a13,13 0 0 1 2,25 Z" />
+                <g id="s3a-rain" class="stroke cyan" stroke-width="2" opacity="0.7">
+                  <line x1="-22" y1="18" x2="-26" y2="30" />
+                  <line x1="-4" y1="20" x2="-8" y2="32" />
+                  <line x1="14" y1="18" x2="10" y2="30" />
+                </g>
               </g>
-            </g>
-            <text x="180" y="208" text-anchor="middle" font-family="Space Grotesk, sans-serif"
-              font-size="34" font-weight="700" fill="#E8F4F6" id="s3-temp">18°</text>
-            <text x="180" y="228" text-anchor="middle" class="mono-label" fill="#46ECFF">THUNDERSTORM · 21:40</text>
-            <g id="s3-cards">
-              <g class="ins">
-                <rect x="28" y="248" width="148" height="36" rx="8" class="stroke dim" stroke-width="1" />
-                <text x="40" y="264" class="mono-label" fill="#46ECFF">RECENT INSIGHT</text>
-                <text x="40" y="277" class="mono-label">FOCUS PEAKED 14:00</text>
-              </g>
-              <g class="ins">
-                <rect x="184" y="248" width="148" height="36" rx="8" class="stroke dim" stroke-width="1" />
-                <text x="196" y="264" class="mono-label" fill="#46ECFF">WEATHER &amp; TIME</text>
-                <text x="196" y="277" class="mono-label">RAIN EASES BY 23:00</text>
-              </g>
-            </g>
-          </svg>
+            </svg>
+            <div class="cell-h"><span class="n">01</span> 雷雨雲</div>
+            <div class="cell-t">雲飄移、雨絲不斷落下,降雨即時回報。</div>
+          </div>
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="閃電">
+              <path class="dr stroke dim" stroke-width="1.4" d="M44,22 a22,16 0 1 1 6,30" />
+              <path id="s3b-bolt" class="dr stroke signal glow" stroke-width="3" d="M74,18 L60,50 L76,50 L62,82" />
+            </svg>
+            <div class="cell-h"><span class="n">02</span> 閃電 BOLT</div>
+            <div class="cell-t">閃電一筆畫成再爆閃,雷擊預警。</div>
+          </div>
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="時間洞察">
+              <circle class="dr stroke hi" cx="70" cy="48" r="28" />
+              <line id="s3c-hour" class="stroke hi" x1="70" y1="48" x2="70" y2="30" stroke-width="2.4" />
+              <line id="s3c-min" class="stroke cyan" x1="70" y1="48" x2="86" y2="52" stroke-width="2" />
+              <circle class="nd" cx="70" cy="48" r="3" fill="#46ECFF" />
+            </svg>
+            <div class="cell-h"><span class="n">03</span> 時間洞察</div>
+            <div class="cell-t">指針走動,提示尖峰與雨歇時段。</div>
+          </div>
+
         </div>
-        <div class="ad__tags"><span>CLOUD DRIFT</span><span>RAIN LOOP</span><span>LIGHTNING FLASH</span></div>
       </article>
     </section>
 
@@ -612,44 +379,48 @@
     <section class="ad-stop" id="s4">
       <article class="ad" data-enter="flip3d">
         <div class="ad__badge"><span class="no">MODULE 04</span> · NEUROSPHERE / 腦波掃描</div>
-        <h2 class="ad__title"><span class="lead">AI 導讀：線框大腦自繪,神經網路在眼前重新連線。</span></h2>
-        <div class="ad__stage">
-          <svg id="svg4" viewBox="0 0 320 280" role="img" aria-label="腦波掃描">
-            <g class="stroke dim" stroke-width="0.6" opacity="0.5">
-              <line x1="0" y1="70" x2="320" y2="70" />
-              <line x1="0" y1="140" x2="320" y2="140" />
-              <line x1="0" y1="210" x2="320" y2="210" />
-              <line x1="80" y1="0" x2="80" y2="280" />
-              <line x1="160" y1="0" x2="160" y2="280" />
-              <line x1="240" y1="0" x2="240" y2="280" />
-            </g>
-            <g class="glow">
-              <path id="s4-brain" class="stroke cyan" stroke-width="2"
-                d="M104,210 C70,206 52,176 64,150 C44,132 58,96 88,98 C92,70 132,58 156,76 C176,58 216,66 222,96 C254,96 266,134 244,154 C260,180 238,212 204,206 C190,228 150,230 134,210 C124,216 112,214 104,210 Z" />
-              <path class="stroke gyrus" stroke-width="1.4" fill="none" d="M156,76 C150,110 158,150 150,200" />
-              <path class="stroke gyrus" stroke-width="1.4" fill="none" d="M104,120 C128,112 132,142 112,156 C130,166 122,188 106,188" />
-              <path class="stroke gyrus" stroke-width="1.4" fill="none" d="M196,110 C176,124 198,146 182,164 C200,176 188,196 174,196" />
-            </g>
-            <g id="s4-synapses" class="stroke cyan" stroke-width="1" opacity="0.55">
-              <line x1="100" y1="130" x2="150" y2="110" />
-              <line x1="150" y1="110" x2="200" y2="135" />
-              <line x1="150" y1="110" x2="140" y2="170" />
-              <line x1="140" y1="170" x2="190" y2="180" />
-              <line x1="100" y1="130" x2="140" y2="170" />
-              <line x1="200" y1="135" x2="190" y2="180" />
-            </g>
-            <g id="s4-nodes" fill="#46ECFF">
-              <circle cx="100" cy="130" r="4" />
-              <circle cx="150" cy="110" r="5" />
-              <circle cx="200" cy="135" r="4" />
-              <circle cx="140" cy="170" r="4.5" />
-              <circle cx="190" cy="180" r="4" />
-            </g>
-            <circle id="s4-pulse" r="3.5" fill="#FF5C38" class="glow" opacity="0" />
-            <text x="20" y="266" class="mono-label" fill="#46ECFF">ACTIVITY ··· <tspan id="s4-pct">0</tspan>% SYNCED</text>
-          </svg>
+        <h2 class="ad__title"><span class="lead">AI 導讀：輪廓自繪、節點脈動、突觸奔走,三步重建神經網路。</span></h2>
+        <div class="ad__rows">
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="輪廓自繪">
+              <path class="dr stroke cyan glow" stroke-width="2"
+                d="M50,78 C34,76 26,60 33,48 C24,40 30,24 44,26 C46,14 66,10 76,20 C90,14 106,22 104,38 C116,42 114,62 100,64 C96,78 70,80 62,70 C58,74 54,76 50,78 Z" />
+            </svg>
+            <div class="cell-h"><span class="n">01</span> 輪廓自繪</div>
+            <div class="cell-t">線框大腦沿輪廓一筆筆描繪成形。</div>
+          </div>
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="節點脈動">
+              <g class="dr stroke cyan" stroke-width="1" opacity="0.5">
+                <line x1="40" y1="56" x2="70" y2="34" />
+                <line x1="70" y1="34" x2="100" y2="54" />
+                <line x1="70" y1="34" x2="66" y2="72" />
+                <line x1="40" y1="56" x2="66" y2="72" />
+              </g>
+              <g id="s4b-nodes" fill="#46ECFF">
+                <circle class="nd" cx="40" cy="56" r="5" />
+                <circle class="nd" cx="70" cy="34" r="6" />
+                <circle class="nd" cx="100" cy="54" r="5" />
+                <circle class="nd" cx="66" cy="72" r="5" />
+              </g>
+            </svg>
+            <div class="cell-h"><span class="n">02</span> 節點脈動</div>
+            <div class="cell-t">神經節點依序亮起、持續脈動。</div>
+          </div>
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="突觸奔走">
+              <path id="s4c-path" class="dr stroke hi" stroke-width="1.6"
+                d="M22,72 C40,40 60,40 70,52 C82,66 100,60 118,28" />
+              <circle id="s4c-pulse" r="4" fill="#FF5C38" class="glow" opacity="0" />
+            </svg>
+            <div class="cell-h"><span class="n">03</span> 突觸奔走</div>
+            <div class="cell-t">訊號沿突觸來回奔走,連線完成。</div>
+          </div>
+
         </div>
-        <div class="ad__tags"><span>OUTLINE DRAW</span><span>NODE PULSE</span><span>SIGNAL TRAVEL</span></div>
       </article>
     </section>
 
@@ -657,45 +428,52 @@
     <section class="ad-stop" id="s5">
       <article class="ad" data-enter="depth">
         <div class="ad__badge"><span class="no">MODULE 05</span> · NEUROSPHERE / 個人檔案</div>
-        <h2 class="ad__title"><span class="lead">AI 導讀：頭像環旋轉,開關逐一上線,設定頁也是儀表。</span></h2>
-        <div class="ad__stage">
-          <svg id="svg5" viewBox="0 0 360 130" role="img" aria-label="個人檔案頭像">
-            <g transform="translate(64,68)">
-              <circle class="stroke dim" cx="0" cy="0" r="40" />
-              <circle id="s5-ring" class="stroke cyan glow" cx="0" cy="0" r="40"
-                stroke-width="3" stroke-dasharray="34 18" transform="rotate(-90)" />
-              <circle cx="0" cy="-6" r="11" class="stroke" stroke-width="2" />
-              <path class="stroke" stroke-width="2" d="M-15,18 a15,15 0 0 1 30,0" />
-            </g>
-            <text x="124" y="54" font-family="Space Grotesk, sans-serif" font-size="20" font-weight="700" fill="#E8F4F6">Alexander Chen</text>
-            <text x="124" y="74" class="mono-label" fill="#46ECFF">NEURAL ID · 0xA1C7</text>
-            <g id="s5-well" transform="translate(124,90)">
-              <rect class="wb" x="0" y="0" width="8" height="22" rx="2" fill="#00E0C6" />
-              <rect class="wb" x="14" y="0" width="8" height="22" rx="2" fill="#00E0C6" />
-              <rect class="wb" x="28" y="0" width="8" height="22" rx="2" fill="#46ECFF" />
-              <rect class="wb" x="42" y="0" width="8" height="22" rx="2" fill="#00E0C6" />
-              <rect class="wb" x="56" y="0" width="8" height="22" rx="2" fill="#00E0C6" />
-              <rect class="wb" x="70" y="0" width="8" height="22" rx="2" fill="#FF5C38" />
-            </g>
-            <text x="220" y="100" class="mono-label">NEURAL WELLNESS</text>
-          </svg>
+        <h2 class="ad__title"><span class="lead">AI 導讀：頭像環、健康指標、偏好開關,設定頁也是儀表。</span></h2>
+        <div class="ad__rows">
 
-          <div class="stage-ui" style="max-width:none">
-            <div class="ui-row" data-row>
-              <div>神經健康監測<small>NEURAL WELLNESS</small></div>
-              <div class="tgl" data-tgl><span class="knob"></span></div>
-            </div>
-            <div class="ui-row" data-row>
-              <div>社交隱私<small>SOCIAL PRIVACY</small></div>
-              <div class="tgl" data-tgl><span class="knob"></span></div>
-            </div>
-            <div class="ui-row" data-row>
-              <div>專注模式 · 自動排程<small>FOCUS · AUTO SCHEDULE</small></div>
-              <div class="tgl" data-tgl><span class="knob"></span></div>
-            </div>
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="頭像環">
+              <circle class="dr stroke dim" cx="70" cy="48" r="32" />
+              <circle id="s5a-ring" class="stroke cyan glow" cx="70" cy="48" r="32" stroke-width="3" stroke-dasharray="28 14" transform="rotate(-90)" style="transform-origin:70px 48px" />
+              <circle class="dr stroke hi" cx="70" cy="42" r="9" stroke-width="2" />
+              <path class="dr stroke hi" stroke-width="2" d="M58,64 a12,12 0 0 1 24,0" />
+            </svg>
+            <div class="cell-h"><span class="n">01</span> 頭像環</div>
+            <div class="cell-t">分段身分環旋轉校準,鎖定 Neural ID。</div>
           </div>
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="健康指標">
+              <g id="s5b-well" transform="translate(34,78)">
+                <rect class="wb" x="0" y="-44" width="11" height="44" rx="2" fill="#00E0C6" />
+                <rect class="wb" x="18" y="-44" width="11" height="44" rx="2" fill="#00E0C6" />
+                <rect class="wb" x="36" y="-44" width="11" height="44" rx="2" fill="#46ECFF" />
+                <rect class="wb" x="54" y="-44" width="11" height="44" rx="2" fill="#00E0C6" />
+                <rect class="wb" x="72" y="-44" width="11" height="44" rx="2" fill="#FF5C38" />
+              </g>
+            </svg>
+            <div class="cell-h"><span class="n">02</span> 健康指標</div>
+            <div class="cell-t">神經健康長條呼吸般起伏,持續監測。</div>
+          </div>
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="偏好開關">
+              <g class="tgl" transform="translate(34,28)">
+                <rect class="dr stroke dim" x="0" y="0" width="44" height="22" rx="11" />
+                <circle class="knob" cx="11" cy="11" r="7" fill="#7C8B95" />
+              </g>
+              <g class="tgl" transform="translate(34,58)">
+                <rect class="dr stroke dim" x="0" y="0" width="44" height="22" rx="11" />
+                <circle class="knob" cx="11" cy="11" r="7" fill="#7C8B95" />
+              </g>
+              <text x="90" y="33" class="mono-s">WELLNESS</text>
+              <text x="90" y="63" class="mono-s">PRIVACY</text>
+            </svg>
+            <div class="cell-h"><span class="n">03</span> 偏好開關</div>
+            <div class="cell-t">開關逐一切換上線,偏好即時生效。</div>
+          </div>
+
         </div>
-        <div class="ad__tags"><span>RING SPIN</span><span>BARS BREATHE</span><span>TOGGLES ON</span></div>
       </article>
     </section>
 
@@ -703,74 +481,69 @@
     <section class="ad-stop" id="s6">
       <article class="ad" data-enter="clip">
         <div class="ad__badge"><span class="no">MODULE 06</span> · NEUROSPHERE / 智慧家庭</div>
-        <h2 class="ad__title"><span class="lead">AI 導讀：房間依序點亮,場景預設環各自填充到位。</span></h2>
-        <div class="ad__stage">
-          <svg id="svg6" viewBox="0 0 360 300" role="img" aria-label="智慧家庭場景">
-            <g id="s6-tiles">
-              <g class="tile" transform="translate(28,24)">
-                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
-                <circle cx="46" cy="32" r="11" class="stroke cyan" stroke-width="2" />
-                <line x1="46" y1="43" x2="46" y2="52" class="stroke cyan" stroke-width="2" />
-                <text x="46" y="68" text-anchor="middle" class="mono-label">LIVING</text>
+        <h2 class="ad__title"><span class="lead">AI 導讀：房間、場景、安防三則,一眼掌控整個空間。</span></h2>
+        <div class="ad__rows">
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="房間">
+              <g id="s6a-tiles">
+                <g class="tile" transform="translate(26,16)">
+                  <rect class="dr stroke dim" width="40" height="30" rx="5" />
+                  <circle cx="20" cy="15" r="6" class="stroke cyan" stroke-width="1.6" />
+                </g>
+                <g class="tile" transform="translate(74,16)">
+                  <rect class="dr stroke dim" width="40" height="30" rx="5" />
+                  <rect x="12" y="9" width="16" height="11" rx="2" class="stroke cyan" stroke-width="1.6" />
+                </g>
+                <g class="tile" transform="translate(26,52)">
+                  <rect class="dr stroke dim" width="40" height="30" rx="5" />
+                  <path d="M14,21 L20,9 L26,21 Z" class="stroke cyan" stroke-width="1.6" fill="none" />
+                </g>
+                <g class="tile" transform="translate(74,52)">
+                  <rect class="dr stroke dim" width="40" height="30" rx="5" />
+                  <polygon points="20,8 28,14 25,23 15,23 12,14" class="stroke cyan" stroke-width="1.6" fill="none" />
+                </g>
               </g>
-              <g class="tile" transform="translate(134,24)">
-                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
-                <rect x="34" y="22" width="24" height="18" rx="3" class="stroke cyan" stroke-width="2" />
-                <line x1="46" y1="40" x2="46" y2="50" class="stroke cyan" stroke-width="2" />
-                <text x="46" y="68" text-anchor="middle" class="mono-label">BEDROOM</text>
+            </svg>
+            <div class="cell-h"><span class="n">01</span> 房間</div>
+            <div class="cell-t">客廳、臥室、書房依序點亮。</div>
+          </div>
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="場景">
+              <g id="s6b-scenes">
+                <g transform="translate(36,48)">
+                  <circle class="stroke dim" cx="0" cy="0" r="20" stroke-width="4" />
+                  <circle class="sc" cx="0" cy="0" r="20" stroke-width="4" transform="rotate(-90)" fill="none" stroke="#46ECFF" stroke-linecap="round" />
+                  <text x="0" y="3" text-anchor="middle" class="mono-s">DAWN</text>
+                </g>
+                <g transform="translate(104,48)">
+                  <circle class="stroke dim" cx="0" cy="0" r="20" stroke-width="4" />
+                  <circle class="sc" cx="0" cy="0" r="20" stroke-width="4" transform="rotate(-90)" fill="none" stroke="#FF5C38" stroke-linecap="round" />
+                  <text x="0" y="3" text-anchor="middle" class="mono-s">NIGHT</text>
+                </g>
               </g>
-              <g class="tile" transform="translate(240,24)">
-                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
-                <path d="M38,40 L46,22 L54,40 Z" class="stroke cyan" stroke-width="2" fill="none" />
-                <text x="46" y="68" text-anchor="middle" class="mono-label">OFFICE</text>
-              </g>
-              <g class="tile" transform="translate(28,112)">
-                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
-                <circle cx="46" cy="32" r="10" class="stroke cyan" stroke-width="2" />
-                <path d="M40,32 a6,6 0 0 0 12,0" class="stroke cyan" stroke-width="2" fill="none" />
-                <text x="46" y="68" text-anchor="middle" class="mono-label">KITCHEN</text>
-              </g>
-              <g class="tile" transform="translate(134,112)">
-                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
-                <polygon points="46,22 56,30 52,42 40,42 36,30" class="stroke cyan" stroke-width="2" fill="none" />
-                <text x="46" y="68" text-anchor="middle" class="mono-label">GARDEN</text>
-              </g>
-              <g class="tile" transform="translate(240,112)">
-                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
-                <rect x="36" y="24" width="20" height="16" rx="2" class="stroke cyan" stroke-width="2" />
-                <circle cx="46" cy="32" r="4" class="stroke cyan" stroke-width="2" />
-                <text x="46" y="68" text-anchor="middle" class="mono-label">CAMERA</text>
-              </g>
-            </g>
-            <text x="30" y="218" class="mono-label">SCENE PRESETS</text>
-            <g id="s6-scenes">
-              <g transform="translate(72,256)">
-                <circle class="stroke dim" cx="0" cy="0" r="24" stroke-width="4" />
-                <circle class="sc" cx="0" cy="0" r="24" stroke-width="4" transform="rotate(-90)"
-                  fill="none" stroke="#46ECFF" stroke-linecap="round" />
-                <text x="0" y="4" text-anchor="middle" class="mono-label">DAWN</text>
-              </g>
-              <g transform="translate(180,256)">
-                <circle class="stroke dim" cx="0" cy="0" r="24" stroke-width="4" />
-                <circle class="sc" cx="0" cy="0" r="24" stroke-width="4" transform="rotate(-90)"
-                  fill="none" stroke="#00E0C6" stroke-linecap="round" />
-                <text x="0" y="4" text-anchor="middle" class="mono-label">FOCUS</text>
-              </g>
-              <g transform="translate(288,256)">
-                <circle class="stroke dim" cx="0" cy="0" r="24" stroke-width="4" />
-                <circle class="sc" cx="0" cy="0" r="24" stroke-width="4" transform="rotate(-90)"
-                  fill="none" stroke="#FF5C38" stroke-linecap="round" />
-                <text x="0" y="4" text-anchor="middle" class="mono-label">NIGHT</text>
-              </g>
-            </g>
-          </svg>
+            </svg>
+            <div class="cell-h"><span class="n">02</span> 場景</div>
+            <div class="cell-t">場景預設環各自填充到位。</div>
+          </div>
+
+          <div class="ad__row">
+            <svg class="cell" viewBox="0 0 140 96" aria-label="安防">
+              <path id="s6c-shield" class="dr stroke hi glow" stroke-width="2"
+                d="M70,16 L96,26 V50 C96,68 84,78 70,84 C56,78 44,68 44,50 V26 Z" />
+              <path class="dr stroke cyan" stroke-width="2.4" d="M60,50 L68,58 L82,40" />
+            </svg>
+            <div class="cell-h"><span class="n">03</span> 安防</div>
+            <div class="cell-t">全屋守護待命,異常即時鎖定。</div>
+          </div>
+
         </div>
-        <div class="ad__tags"><span>TILES LIGHT-UP</span><span>RING FILL</span><span>ACTIVE PULSE</span></div>
       </article>
     </section>
 
     <footer>
-      <div class="big">六個概念,一套廣告模組樣式。</div>
+      <div class="big">一外框、三則欄位,六個概念。</div>
       <div class="metaf">
         全部動態 SVG · GSAP 驅動 · 三種進場輪流套用 · 尊重 prefers-reduced-motion<br>
         <a href="ad-modules.html">← 廣告模組</a> &nbsp;·&nbsp;
@@ -788,10 +561,8 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    /* top progress bar */
     gsap.to("#topbar", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: 0.3 } });
 
-    /* side-rail active dot */
     document.querySelectorAll(".ad-stop").forEach((sec, i) => {
       const dots = document.querySelectorAll(".rail a");
       ScrollTrigger.create({
@@ -800,13 +571,11 @@
       });
     });
 
-    /* helper: prep a path/circle for a self-draw (stroke-dashoffset) */
     function prepDraw(el) {
       const len = (el.getTotalLength ? el.getTotalLength() : 0) || 1;
       gsap.set(el, { strokeDasharray: len, strokeDashoffset: len });
       return len;
     }
-
     function onView(trigger, fn) {
       ScrollTrigger.create({ trigger, start: "top 70%", once: true, onEnter: fn });
     }
@@ -829,204 +598,111 @@
         });
       });
 
-      /* ---------- 01 · login ---------- */
-      (() => {
-        const svg = document.querySelector("#svg1");
-        const rings = ["#s1-r1", "#s1-r3"].map(s => svg.querySelector(s));
-        const arc = svg.querySelector("#s1-arc");
-        const r2 = svg.querySelector("#s1-r2");
-        const net = svg.querySelectorAll("#s1-net line");
-        const stars = svg.querySelectorAll("#s1-stars circle");
-        const ticks = svg.querySelector("#s1-ticks");
-        const word = svg.querySelector("#s1-word"), sub = svg.querySelector("#s1-sub");
-        const logins = document.querySelectorAll("[data-login]");
-
-        rings.forEach(prepDraw);
-        prepDraw(arc);
-        gsap.set([word, sub], { autoAlpha: 0 });
-        gsap.set(stars, { scale: 0, transformOrigin: "50% 50%" });
-        gsap.set(logins, { autoAlpha: 0, y: 14 });
-        net.forEach(prepDraw);
-
-        onView("#s1", () => {
-          const tl = gsap.timeline();
-          tl.to(net, { strokeDashoffset: 0, duration: 0.8, stagger: 0.06, ease: "power2.out" })
-            .to(stars, { scale: 1, duration: 0.4, stagger: 0.05, ease: "back.out(2)" }, "-=0.7")
-            .to(rings, { strokeDashoffset: 0, duration: 1.1, stagger: 0.15, ease: "power2.inOut" }, "-=0.3")
-            .to(arc, { strokeDashoffset: 0, duration: 0.7, ease: "power2.out" }, "-=0.6")
-            .to([word, sub], { autoAlpha: 1, duration: 0.5, stagger: 0.12 }, "-=0.2")
-            .to(logins, { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.1 }, "-=0.1");
-
-          gsap.to(arc, { rotation: 360, svgOrigin: "180 150", duration: 18, repeat: -1, ease: "none" });
-          gsap.to(r2, { rotation: -360, svgOrigin: "180 150", duration: 26, repeat: -1, ease: "none" });
-          gsap.to(ticks, { rotation: 360, svgOrigin: "180 150", duration: 40, repeat: -1, ease: "none" });
-          gsap.to(stars, { autoAlpha: 0.4, duration: 1.2, stagger: { each: 0.3, repeat: -1, yoyo: true }, ease: "sine.inOut" });
+      /* generic: draw a column's strokes + pop its nodes, staggered across columns */
+      function revealColumns(sectionSel, baseFn) {
+        const cols = document.querySelectorAll(sectionSel + " .ad__row");
+        cols.forEach(col => {
+          col.querySelectorAll(".dr").forEach(prepDraw);
+          gsap.set(col.querySelectorAll(".nd"), { scale: 0, transformOrigin: "50% 50%" });
         });
-      })();
+        onView(sectionSel, () => {
+          const tl = gsap.timeline();
+          cols.forEach((col, ci) => {
+            const at = ci * 0.18;
+            tl.to(col.querySelectorAll(".dr"), { strokeDashoffset: 0, duration: 0.7, stagger: 0.06, ease: "power2.out" }, at)
+              .to(col.querySelectorAll(".nd"), { scale: 1, duration: 0.3, stagger: 0.05, ease: "back.out(2.2)" }, at + 0.25);
+          });
+          if (baseFn) baseFn(tl);
+        });
+      }
 
-      /* ---------- 02 · dashboard ---------- */
+      /* 01 · login */
+      revealColumns("#s1", () => {
+        gsap.to("#s1a-spin", { rotation: -360, svgOrigin: "70 46", duration: 14, repeat: -1, ease: "none" });
+        gsap.to("#s1b-stars circle", { autoAlpha: 0.4, duration: 1.1, stagger: { each: 0.25, repeat: -1, yoyo: true }, ease: "sine.inOut" });
+        gsap.fromTo("#s1c-scan", { attr: { y1: 40, y2: 40 } }, { attr: { y1: 66, y2: 66 }, duration: 1.6, repeat: -1, yoyo: true, ease: "sine.inOut" });
+      });
+
+      /* 02 · neural activity */
       (() => {
-        const svg = document.querySelector("#svg2");
-        const line = svg.querySelector("#s2-line"), line2 = svg.querySelector("#s2-line2");
-        const bars = svg.querySelectorAll("#s2-bars .bar");
-        const vbs = svg.querySelectorAll("#s2-voice .vb");
-        const donut = svg.querySelector("#s2-donut"), donutVal = svg.querySelector("#s2-donut-val");
-        const heights = [26, 40, 32, 52, 60, 36];
-
-        prepDraw(line);
-        gsap.set(line2, { autoAlpha: 0 });
+        const donut = document.querySelector("#s2c-donut");
         const dLen = donut.getTotalLength();
         gsap.set(donut, { strokeDasharray: dLen, strokeDashoffset: dLen });
-
-        onView("#s2", () => {
-          const tl = gsap.timeline();
-          tl.to(line, { strokeDashoffset: 0, duration: 1.3, ease: "power2.out" })
-            .to(line2, { autoAlpha: 0.35, duration: 0.4 }, "-=0.5")
-            .to(bars, { attr: { height: (i) => heights[i], y: (i) => 280 - heights[i] }, duration: 0.7, stagger: 0.08, ease: "back.out(1.6)" }, "-=0.8");
-
-          const c = { v: 0 }, target = 84;
-          tl.to(donut, { strokeDashoffset: dLen * (1 - target / 100), duration: 1, ease: "power2.out" }, "-=0.4")
-            .to(c, { v: target, duration: 1, ease: "power2.out", onUpdate: () => donutVal.textContent = Math.round(c.v) + "%" }, "<");
-
-          vbs.forEach((b, i) => {
-            gsap.to(b, { attr: { y1: () => -gsap.utils.random(4, 22), y2: () => gsap.utils.random(4, 22) }, duration: 0.4 + i * 0.05, repeat: -1, yoyo: true, repeatRefresh: true, ease: "sine.inOut" });
-          });
-          gsap.fromTo(line2, { x: 0 }, { x: -28, duration: 1.4, repeat: -1, ease: "none" });
-          gsap.to(line, { y: "+=4", duration: 1.8, repeat: -1, yoyo: true, ease: "sine.inOut" });
-        });
-      })();
-
-      /* ---------- 03 · weather ---------- */
-      (() => {
-        const svg = document.querySelector("#svg3");
-        const cloud = svg.querySelector("#s3-cloud"), bolt = svg.querySelector("#s3-bolt");
-        const rain = svg.querySelectorAll("#s3-rain line");
-        const cards = svg.querySelectorAll("#s3-cards .ins");
-        const temp = svg.querySelector("#s3-temp");
-
-        prepDraw(cloud); prepDraw(bolt);
-        gsap.set(rain, { autoAlpha: 0 });
-        gsap.set(cards, { autoAlpha: 0, y: 12 });
-        gsap.set(temp, { autoAlpha: 0 });
-
-        onView("#s3", () => {
-          const tl = gsap.timeline();
-          tl.to(cloud, { strokeDashoffset: 0, duration: 1, ease: "power2.out" })
-            .to(temp, { autoAlpha: 1, duration: 0.4 }, "-=0.3")
-            .to(bolt, { strokeDashoffset: 0, duration: 0.4, ease: "power1.in" }, "-=0.2")
-            .to(rain, { autoAlpha: 0.7, duration: 0.3 }, "-=0.1")
-            .to(cards, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.12 }, "-=0.2");
-
-          gsap.to(svg.querySelector("#s3-weather"), { x: "+=10", duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" });
-          rain.forEach((r, i) => {
-            gsap.fromTo(r, { y: -8, autoAlpha: 0 },
-              { y: 20, autoAlpha: 0.8, duration: 0.7, repeat: -1, delay: i * 0.18, ease: "power1.in", onRepeat() { gsap.set(r, { y: -8 }); } });
-          });
-          gsap.to(bolt, { autoAlpha: 0.15, duration: 0.12, repeat: -1, repeatDelay: 2.6, yoyo: true, ease: "none" });
-        });
-      })();
-
-      /* ---------- 04 · brain scan ---------- */
-      (() => {
-        const svg = document.querySelector("#svg4");
-        const brain = svg.querySelector("#s4-brain");
-        const gyri = svg.querySelectorAll(".gyrus");
-        const synapses = svg.querySelectorAll("#s4-synapses line");
-        const nodes = svg.querySelectorAll("#s4-nodes circle");
-        const pulse = svg.querySelector("#s4-pulse");
-        const pct = document.querySelector("#s4-pct");
-
-        prepDraw(brain);
-        gyri.forEach(prepDraw);
-        synapses.forEach(prepDraw);
-        gsap.set(nodes, { scale: 0, transformOrigin: "50% 50%" });
-
-        onView("#s4", () => {
-          const tl = gsap.timeline();
+        const heights = [30, 44, 22, 50];
+        revealColumns("#s2", (tl) => {
+          gsap.set("#s2b-line2", { autoAlpha: 0 });
+          tl.to("#s2c-bars .bar", { attr: { height: (i) => heights[i], y: (i) => 78 - heights[i] }, duration: 0.6, stagger: 0.06, ease: "back.out(1.6)" }, 0.4);
           const c = { v: 0 };
-          tl.to(brain, { strokeDashoffset: 0, duration: 1.6, ease: "power2.inOut" })
-            .to(c, { v: 100, duration: 1.6, ease: "power2.inOut", onUpdate: () => pct.textContent = Math.round(c.v) }, "<")
-            .to(gyri, { strokeDashoffset: 0, duration: 0.9, stagger: 0.15, ease: "power2.out" }, "-=0.9")
-            .to(synapses, { strokeDashoffset: 0, duration: 0.6, stagger: 0.08, ease: "power2.out" }, "-=0.6")
-            .to(nodes, { scale: 1, duration: 0.4, stagger: 0.08, ease: "back.out(2.2)" }, "-=0.4");
-
-          gsap.to(nodes, { scale: 1.35, transformOrigin: "50% 50%", duration: 0.9, stagger: { each: 0.18, repeat: -1, yoyo: true }, ease: "sine.inOut" });
-
-          const path = [[100, 130], [150, 110], [200, 135], [190, 180], [140, 170], [100, 130]];
-          gsap.set(pulse, { attr: { cx: path[0][0], cy: path[0][1] }, autoAlpha: 1 });
-          const travel = gsap.timeline({ repeat: -1 });
-          path.slice(1).forEach(p => travel.to(pulse, { attr: { cx: p[0], cy: p[1] }, duration: 0.55, ease: "power1.inOut" }));
+          tl.to(donut, { strokeDashoffset: dLen * 0.16, duration: 0.9, ease: "power2.out" }, 0.5)
+            .to(c, { v: 84, duration: 0.9, ease: "power2.out", onUpdate: () => document.querySelector("#s2c-val").textContent = Math.round(c.v) + "%" }, "<")
+            .to("#s2b-line2", { autoAlpha: 0.3, duration: 0.4 }, 0.3);
+          // ambient
+          document.querySelectorAll("#s2a-voice .vb").forEach((b, i) => {
+            gsap.to(b, { attr: { y1: () => -gsap.utils.random(4, 16), y2: () => gsap.utils.random(4, 16) }, duration: 0.4 + i * 0.05, repeat: -1, yoyo: true, repeatRefresh: true, ease: "sine.inOut" });
+          });
+          gsap.fromTo("#s2b-line2", { x: 0 }, { x: -18, duration: 1.4, repeat: -1, ease: "none" });
         });
       })();
 
-      /* ---------- 05 · profile ---------- */
-      (() => {
-        const svg = document.querySelector("#svg5");
-        const ring = svg.querySelector("#s5-ring");
-        const wbs = svg.querySelectorAll("#s5-well .wb");
-        const rows = document.querySelectorAll("#s5 [data-row]");
-        const tgls = document.querySelectorAll("#s5 [data-tgl]");
-
-        gsap.set(rows, { autoAlpha: 0, x: 16 });
-        gsap.set(wbs, { transformOrigin: "50% 100%", scaleY: 0.2 });
-
-        onView("#s5", () => {
-          const tl = gsap.timeline();
-          tl.from(ring, { rotation: -180, svgOrigin: "64 68", autoAlpha: 0, duration: 0.9, ease: "power2.out" })
-            .to(wbs, { scaleY: 1, duration: 0.5, stagger: 0.06, ease: "power2.out" }, "-=0.4")
-            .to(rows, { autoAlpha: 1, x: 0, duration: 0.45, stagger: 0.14, ease: "power2.out" }, "-=0.3");
-
-          tgls.forEach((t) => {
-            const knob = t.querySelector(".knob");
-            tl.to(knob, { x: 22, backgroundColor: "#070B10", duration: 0.3, ease: "back.out(2)" }, ">-0.05")
-              .to(t, { borderColor: "var(--cyan)", backgroundColor: "rgba(70,236,255,0.18)", duration: 0.3 }, "<");
-          });
-
-          gsap.to(ring, { rotation: "+=360", svgOrigin: "64 68", duration: 12, repeat: -1, ease: "none" });
-          wbs.forEach((b, i) => {
-            gsap.to(b, { scaleY: () => gsap.utils.random(0.4, 1), transformOrigin: "50% 100%", duration: 0.6 + i * 0.05, repeat: -1, yoyo: true, repeatRefresh: true, ease: "sine.inOut" });
-          });
+      /* 03 · weather */
+      revealColumns("#s3", () => {
+        document.querySelectorAll("#s3a-rain line").forEach((r, i) => {
+          gsap.fromTo(r, { y: -6, autoAlpha: 0 }, { y: 16, autoAlpha: 0.8, duration: 0.7, repeat: -1, delay: i * 0.2, ease: "power1.in", onRepeat() { gsap.set(r, { y: -6 }); } });
         });
-      })();
+        gsap.to("#s3b-bolt", { autoAlpha: 0.15, duration: 0.12, repeat: -1, repeatDelay: 2.4, yoyo: true, ease: "none" });
+        gsap.to("#s3c-min", { rotation: 360, svgOrigin: "70 48", duration: 8, repeat: -1, ease: "none" });
+        gsap.to("#s3c-hour", { rotation: 360, svgOrigin: "70 48", duration: 48, repeat: -1, ease: "none" });
+      });
 
-      /* ---------- 06 · smart home ---------- */
-      (() => {
-        const svg = document.querySelector("#svg6");
-        const tiles = svg.querySelectorAll("#s6-tiles .tile");
-        const scenes = svg.querySelectorAll("#s6-scenes .sc");
-        const targets = [0.85, 0.6, 0.4];
-
-        gsap.set(tiles, { autoAlpha: 0, scale: 0.9, transformOrigin: "50% 50%" });
-        scenes.forEach(s => {
-          const len = s.getTotalLength();
-          s.dataset.len = len;
-          gsap.set(s, { strokeDasharray: len, strokeDashoffset: len });
+      /* 04 · brain scan */
+      revealColumns("#s4", () => {
+        gsap.to("#s4b-nodes circle", { scale: 1.4, transformOrigin: "50% 50%", duration: 0.9, stagger: { each: 0.18, repeat: -1, yoyo: true }, ease: "sine.inOut" });
+        const path = document.querySelector("#s4c-path");
+        const pulse = document.querySelector("#s4c-pulse");
+        const L = path.getTotalLength();
+        gsap.set(pulse, { autoAlpha: 1 });
+        const o = { d: 0 };
+        gsap.to(o, {
+          d: L, duration: 2.2, repeat: -1, ease: "power1.inOut",
+          onUpdate: () => { const p = path.getPointAtLength(o.d); gsap.set(pulse, { attr: { cx: p.x, cy: p.y } }); }
         });
+      });
 
-        onView("#s6", () => {
-          const tl = gsap.timeline();
-          tl.to(tiles, { autoAlpha: 1, scale: 1, duration: 0.45, stagger: 0.08, ease: "power2.out" });
-          scenes.forEach((s, i) => {
-            const len = +s.dataset.len;
-            tl.to(s, { strokeDashoffset: len * (1 - targets[i]), duration: 0.8, ease: "power2.out" }, i === 0 ? "-=0.2" : "<+0.15");
-          });
+      /* 05 · profile */
+      revealColumns("#s5", (tl) => {
+        gsap.set("#s5b-well .wb", { transformOrigin: "50% 100%", scaleY: 0.25 });
+        tl.to("#s5b-well .wb", { scaleY: 1, duration: 0.5, stagger: 0.06, ease: "power2.out" }, 0.25);
+        // toggles flip on
+        document.querySelectorAll("#s5 .tgl").forEach((t, i) => {
+          const knob = t.querySelector(".knob");
+          tl.to(knob, { attr: { cx: 33 }, fill: "#070B10", duration: 0.3, ease: "back.out(2)" }, 0.5 + i * 0.15)
+            .to(t.querySelector("rect"), { attr: { stroke: "#46ECFF" }, duration: 0.3 }, "<");
+        });
+        gsap.to("#s5a-ring", { rotation: "+=360", svgOrigin: "70 48", duration: 12, repeat: -1, ease: "none" });
+        document.querySelectorAll("#s5b-well .wb").forEach((b, i) => {
+          gsap.to(b, { scaleY: () => gsap.utils.random(0.4, 1), transformOrigin: "50% 100%", duration: 0.6 + i * 0.05, repeat: -1, yoyo: true, repeatRefresh: true, ease: "sine.inOut" });
+        });
+      });
 
-          gsap.to(tiles, { filter: "drop-shadow(0 0 6px var(--cyan))", duration: 0.6, stagger: { each: 0.25, repeat: -1, yoyo: true }, ease: "sine.inOut" });
-          gsap.to(scenes[1], { opacity: 0.45, duration: 0.8, repeat: -1, yoyo: true, ease: "sine.inOut" });
+      /* 06 · smart home */
+      (() => {
+        const scenes = document.querySelectorAll("#s6b-scenes .sc");
+        const targets = [0.8, 0.45];
+        scenes.forEach(s => { const len = s.getTotalLength(); s.dataset.len = len; gsap.set(s, { strokeDasharray: len, strokeDashoffset: len }); });
+        revealColumns("#s6", (tl) => {
+          scenes.forEach((s, i) => { const len = +s.dataset.len; tl.to(s, { strokeDashoffset: len * (1 - targets[i]), duration: 0.8, ease: "power2.out" }, 0.4 + i * 0.15); });
+          gsap.to("#s6a-tiles .tile", { filter: "drop-shadow(0 0 5px var(--cyan))", duration: 0.6, stagger: { each: 0.2, repeat: -1, yoyo: true }, ease: "sine.inOut" });
+          gsap.to(scenes[0], { opacity: 0.5, duration: 0.9, repeat: -1, yoyo: true, ease: "sine.inOut" });
         });
       })();
 
     });
 
-    /* reduced motion: SVGs render in their drawn resting state; fill counters + bars */
+    /* reduced motion: SVGs render in drawn resting state; fill counters + bars */
     mm.add("(prefers-reduced-motion: reduce)", () => {
-      const p = document.querySelector("#s4-pct"); if (p) p.textContent = "100";
-      const d = document.querySelector("#s2-donut-val"); if (d) d.textContent = "84%";
-      const heights = [26, 40, 32, 52, 60, 36];
-      document.querySelectorAll("#s2-bars .bar").forEach((b, i) => {
-        b.setAttribute("height", heights[i]);
-        b.setAttribute("y", 280 - heights[i]);
-      });
+      const v = document.querySelector("#s2c-val"); if (v) v.textContent = "84%";
+      const heights = [30, 44, 22, 50];
+      document.querySelectorAll("#s2c-bars .bar").forEach((b, i) => { b.setAttribute("height", heights[i]); b.setAttribute("y", 78 - heights[i]); });
     });
 
     document.fonts.ready.then(() => ScrollTrigger.refresh());
