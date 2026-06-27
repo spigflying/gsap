@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEUROSPHERE — 神經介面 · 六個動態 SVG 概念</title>
+  <meta name="description"
+    content="NEUROSPHERE 神經介面概念展示：登入光環、神經活動儀表、洞察天氣、腦波掃描、個人檔案、智慧家庭——六個畫面，全用動態 SVG + GSAP 實作。" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    :root {
+      --ink: #070B10;
+      --ink-2: #0C131B;
+      --panel: rgba(18, 26, 35, 0.6);
+      --line: #00E0C6;
+      /* primary neural teal */
+      --cyan: #46ECFF;
+      /* brighter neural glow */
+      --signal: #FF5C38;
+      --hi: #E8F4F6;
+      --lo: #7C8B95;
+      --hairline: rgba(70, 236, 255, 0.16);
+      --display: "Space Grotesk", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+      --tc: "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--ink);
+      color: var(--hi);
+      font-family: var(--tc);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 50% -10%, rgba(0, 224, 198, 0.10), transparent 50%),
+        radial-gradient(circle at 85% 110%, rgba(70, 236, 255, 0.07), transparent 45%);
+    }
+
+    ::selection {
+      background: var(--cyan);
+      color: #001014;
+    }
+
+    a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+
+    /* ---------- chrome ---------- */
+    .topbar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 3px;
+      z-index: 80;
+      background: rgba(70, 236, 255, 0.08);
+    }
+
+    .topbar i {
+      display: block;
+      height: 100%;
+      width: 100%;
+      transform-origin: left;
+      transform: scaleX(0);
+      background: linear-gradient(90deg, var(--line), var(--cyan));
+      box-shadow: 0 0 12px var(--cyan);
+    }
+
+    .backlink {
+      position: fixed;
+      left: 18px;
+      top: 16px;
+      z-index: 80;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .12em;
+      color: var(--lo);
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      padding: 8px 16px;
+      background: rgba(7, 11, 16, 0.7);
+      backdrop-filter: blur(8px);
+    }
+
+    .backlink:hover {
+      color: var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    /* side rail nav — jumps between the six screens */
+    .rail {
+      position: fixed;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 80;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .rail a {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 1px solid var(--hairline);
+      position: relative;
+    }
+
+    .rail a.on,
+    .rail a:hover {
+      border-color: var(--cyan);
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    @media (max-width: 720px) {
+      .rail { display: none; }
+    }
+
+    /* ---------- screen scaffold ---------- */
+    .screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 80px 24px;
+    }
+
+    .screen__inner {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(30px, 5vw, 72px);
+      align-items: center;
+    }
+
+    .screen.flip .screen__art {
+      order: -1;
+    }
+
+    @media (max-width: 860px) {
+      .screen__inner {
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+
+      .screen.flip .screen__art {
+        order: 0;
+      }
+    }
+
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .32em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .eyebrow .idx {
+      color: var(--lo);
+    }
+
+    .eyebrow::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(90deg, var(--hairline), transparent);
+    }
+
+    .screen h2 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: clamp(30px, 4.4vw, 52px);
+      line-height: 1.02;
+      letter-spacing: -.02em;
+      margin-bottom: 18px;
+    }
+
+    .screen h2 em {
+      font-style: normal;
+      color: var(--cyan);
+      text-shadow: 0 0 26px rgba(70, 236, 255, .4);
+    }
+
+    .screen p.lead {
+      color: var(--lo);
+      font-size: clamp(15px, 1.4vw, 17px);
+      max-width: 44ch;
+    }
+
+    .screen__art {
+      position: relative;
+    }
+
+    .art-card {
+      position: relative;
+      border: 1px solid var(--hairline);
+      border-radius: 20px;
+      background:
+        linear-gradient(180deg, rgba(12, 19, 27, 0.9), rgba(7, 11, 16, 0.9));
+      padding: 22px;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5), inset 0 0 60px rgba(70, 236, 255, 0.03);
+      overflow: hidden;
+    }
+
+    /* corner HUD ticks on every art card */
+    .art-card::before,
+    .art-card::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      pointer-events: none;
+    }
+
+    .art-card::before {
+      left: 12px;
+      top: 12px;
+      border-top: 2px solid var(--line);
+      border-left: 2px solid var(--line);
+    }
+
+    .art-card::after {
+      right: 12px;
+      bottom: 12px;
+      border-bottom: 2px solid var(--line);
+      border-right: 2px solid var(--line);
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      overflow: visible;
+    }
+
+    .stroke {
+      fill: none;
+      stroke: var(--line);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .stroke.cyan { stroke: var(--cyan); }
+    .stroke.signal { stroke: var(--signal); }
+    .stroke.dim { stroke: var(--hairline); }
+
+    .glow { filter: drop-shadow(0 0 4px var(--cyan)); }
+
+    .mono-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: .14em;
+      fill: var(--lo);
+    }
+
+    /* ---------- mock UI bits (login, toggles, tiles) ---------- */
+    .ui-field {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--hairline);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--lo);
+      background: rgba(70, 236, 255, 0.03);
+    }
+
+    .ui-field .ico {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid var(--cyan);
+      flex-shrink: 0;
+    }
+
+    .ui-btn {
+      margin-top: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: var(--cyan);
+      border: none;
+      border-radius: 999px;
+      padding: 13px 24px;
+      cursor: pointer;
+      box-shadow: 0 0 24px rgba(70, 236, 255, 0.35);
+    }
+
+    .ui-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 4px;
+      border-bottom: 1px solid rgba(70, 236, 255, 0.08);
+      font-size: 14px;
+    }
+
+    .ui-row small {
+      display: block;
+      color: var(--lo);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .1em;
+      margin-top: 2px;
+    }
+
+    /* toggle (knob animated by GSAP via .on) */
+    .tgl {
+      width: 46px;
+      height: 24px;
+      border-radius: 999px;
+      border: 1px solid var(--hairline);
+      background: rgba(70, 236, 255, 0.05);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .tgl .knob {
+      position: absolute;
+      left: 3px;
+      top: 50%;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--lo);
+      transform: translate(0, -50%);
+    }
+
+    /* footer */
+    footer {
+      padding: 90px 24px 120px;
+      text-align: center;
+      color: var(--lo);
+    }
+
+    footer .big {
+      font-family: var(--display);
+      font-weight: 700;
+      color: var(--hi);
+      font-size: clamp(24px, 4vw, 40px);
+      letter-spacing: -.02em;
+      margin-bottom: 16px;
+    }
+
+    footer .metaf {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .08em;
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar"><i id="topbar"></i></div>
+  <a class="backlink" href="ad-modules.html">← 廣告模組</a>
+
+  <nav class="rail" aria-label="screens">
+    <a href="#s1" data-rail title="登入入口"></a>
+    <a href="#s2" data-rail title="神經活動"></a>
+    <a href="#s3" data-rail title="洞察 · 天氣"></a>
+    <a href="#s4" data-rail title="腦波掃描"></a>
+    <a href="#s5" data-rail title="個人檔案"></a>
+    <a href="#s6" data-rail title="智慧家庭"></a>
+  </nav>
+
+  <!-- ============ 01 · LOGIN / NEURAL INTERFACE ============ -->
+  <section class="screen" id="s1">
+    <div class="screen__inner">
+      <div class="screen__copy">
+        <div class="eyebrow"><span class="idx">01</span> Access</div>
+        <h2>進入<br><em>神經介面</em>。</h2>
+        <p class="lead">同心 HUD 光環自我描繪、緩速反向旋轉，背景星座連線一條條接通——這是 NEUROSPHERE 的登入閘口。</p>
+        <div class="ui-field" data-login><span class="ico"></span>USERNAME</div>
+        <div class="ui-field" data-login><span class="ico"></span>············</div>
+        <button class="ui-btn" data-login>Enter the Neural Interface →</button>
+      </div>
+
+      <div class="screen__art">
+        <div class="art-card">
+          <svg id="svg1" viewBox="0 0 360 320" role="img" aria-label="神經介面光環">
+            <!-- constellation links -->
+            <g id="s1-net" class="stroke dim" stroke-width="1">
+              <line x1="40" y1="60" x2="120" y2="110" />
+              <line x1="120" y1="110" x2="70" y2="190" />
+              <line x1="320" y1="70" x2="250" y2="120" />
+              <line x1="250" y1="120" x2="310" y2="210" />
+              <line x1="60" y1="250" x2="150" y2="250" />
+              <line x1="300" y1="250" x2="220" y2="220" />
+            </g>
+            <g id="s1-stars">
+              <circle cx="40" cy="60" r="2.4" fill="#46ECFF" />
+              <circle cx="120" cy="110" r="2" fill="#46ECFF" />
+              <circle cx="70" cy="190" r="2.4" fill="#46ECFF" />
+              <circle cx="320" cy="70" r="2" fill="#46ECFF" />
+              <circle cx="250" cy="120" r="2.4" fill="#46ECFF" />
+              <circle cx="310" cy="210" r="2" fill="#46ECFF" />
+              <circle cx="60" cy="250" r="2.4" fill="#46ECFF" />
+              <circle cx="300" cy="250" r="2" fill="#46ECFF" />
+              <circle cx="220" cy="220" r="2" fill="#46ECFF" />
+            </g>
+
+            <!-- HUD rings, centered at 180,150 -->
+            <g class="glow">
+              <circle id="s1-r1" class="stroke" cx="180" cy="150" r="58" />
+              <circle id="s1-r2" class="stroke cyan" cx="180" cy="150" r="84" stroke-dasharray="6 10" />
+              <circle id="s1-r3" class="stroke dim" cx="180" cy="150" r="108" />
+              <path id="s1-arc" class="stroke signal" stroke-width="3"
+                d="M180,42 A108,108 0 0 1 280,108" />
+              <!-- tick ring -->
+              <g id="s1-ticks" class="stroke" stroke-width="1.5">
+                <line x1="180" y1="32" x2="180" y2="44" />
+                <line x1="180" y1="256" x2="180" y2="268" />
+                <line x1="62" y1="150" x2="74" y2="150" />
+                <line x1="286" y1="150" x2="298" y2="150" />
+              </g>
+            </g>
+
+            <text x="180" y="146" text-anchor="middle"
+              font-family="Space Grotesk, sans-serif" font-size="19" font-weight="700"
+              letter-spacing="3" fill="#E8F4F6" id="s1-word">NEUROSPHERE</text>
+            <text x="180" y="166" text-anchor="middle" class="mono-label" id="s1-sub">NEURAL OS · v3.15</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02 · NEURAL ACTIVITY DASHBOARD ============ -->
+  <section class="screen flip" id="s2">
+    <div class="screen__inner">
+      <div class="screen__copy">
+        <div class="eyebrow"><span class="idx">02</span> Dashboard</div>
+        <h2>讀取<br><em>神經活動</em>。</h2>
+        <p class="lead">聲波即時跳動、折線圖自我描繪後持續滾動、效能長條由零拔起——三種圖表同台,構成活著的儀表板。</p>
+      </div>
+
+      <div class="screen__art">
+        <div class="art-card">
+          <svg id="svg2" viewBox="0 0 380 300" role="img" aria-label="神經活動儀表板">
+            <!-- voice meter (radial bars) -->
+            <g id="s2-voice" transform="translate(46,46)">
+              <circle class="stroke dim" cx="0" cy="0" r="30" />
+              <g class="stroke cyan" stroke-width="2.5">
+                <line class="vb" x1="-14" y1="0" x2="-14" y2="0" />
+                <line class="vb" x1="-7" y1="0" x2="-7" y2="0" />
+                <line class="vb" x1="0" y1="0" x2="0" y2="0" />
+                <line class="vb" x1="7" y1="0" x2="7" y2="0" />
+                <line class="vb" x1="14" y1="0" x2="14" y2="0" />
+              </g>
+            </g>
+            <text x="86" y="38" class="mono-label">VOICE</text>
+            <text x="86" y="52" class="mono-label" fill="#46ECFF">● LISTENING</text>
+
+            <!-- neural activity line chart -->
+            <text x="30" y="96" class="mono-label">NEURAL ACTIVITY</text>
+            <rect x="28" y="104" width="324" height="92" rx="8" class="stroke dim" stroke-width="1" />
+            <clipPath id="s2-clip"><rect x="29" y="105" width="322" height="90" rx="8" /></clipPath>
+            <g clip-path="url(#s2-clip)">
+              <path id="s2-line" class="stroke cyan glow" stroke-width="2"
+                d="M30,170 L58,150 L86,162 L114,128 L142,150 L170,120 L198,148 L226,116 L254,142 L282,124 L310,156 L338,138 L366,160" />
+              <!-- scrolling echo line behind -->
+              <path id="s2-line2" class="stroke" stroke-width="1" opacity="0.35"
+                d="M30,180 L58,168 L86,176 L114,150 L142,166 L170,146 L198,168 L226,140 L254,160 L282,148 L310,172 L338,158 L366,176" />
+            </g>
+
+            <!-- performance bars -->
+            <text x="30" y="224" class="mono-label">PERFORMANCE</text>
+            <g id="s2-bars">
+              <rect class="bar" x="34" y="280" width="20" height="0" rx="2" fill="#00E0C6" />
+              <rect class="bar" x="64" y="280" width="20" height="0" rx="2" fill="#00E0C6" />
+              <rect class="bar" x="94" y="280" width="20" height="0" rx="2" fill="#00E0C6" />
+              <rect class="bar" x="124" y="280" width="20" height="0" rx="2" fill="#00E0C6" />
+              <rect class="bar" x="154" y="280" width="20" height="0" rx="2" fill="#FF5C38" />
+              <rect class="bar" x="184" y="280" width="20" height="0" rx="2" fill="#00E0C6" />
+            </g>
+            <!-- AI analytics donut -->
+            <g transform="translate(300,256)">
+              <circle class="stroke dim" cx="0" cy="0" r="26" stroke-width="5" />
+              <circle id="s2-donut" class="stroke cyan" cx="0" cy="0" r="26" stroke-width="5"
+                transform="rotate(-90)" />
+              <text x="0" y="4" text-anchor="middle" class="mono-label" fill="#E8F4F6"
+                id="s2-donut-val">0%</text>
+            </g>
+            <text x="248" y="232" class="mono-label">AI ANALYTICS</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 03 · INSIGHTS · WEATHER & TIME ============ -->
+  <section class="screen" id="s3">
+    <div class="screen__inner">
+      <div class="screen__copy">
+        <div class="eyebrow"><span class="idx">03</span> Insights</div>
+        <h2>洞察 ·<br><em>天氣與時間</em>。</h2>
+        <p class="lead">雷雨雲緩緩飄移、雨絲不斷落下、閃電一筆畫成再爆閃——把環境資訊變成一幕會呼吸的天氣動畫。</p>
+      </div>
+
+      <div class="screen__art">
+        <div class="art-card">
+          <svg id="svg3" viewBox="0 0 360 300" role="img" aria-label="天氣與時間洞察">
+            <!-- weather scene -->
+            <g id="s3-weather" transform="translate(180,96)">
+              <!-- cloud -->
+              <path id="s3-cloud" class="stroke cyan glow" stroke-width="2"
+                d="M-58,18 a26,26 0 0 1 14,-50 a34,34 0 0 1 64,8 a22,22 0 0 1 4,42 Z" />
+              <!-- lightning -->
+              <path id="s3-bolt" class="stroke signal" stroke-width="3" fill="none"
+                d="M2,18 L-12,52 L4,52 L-10,86" />
+              <!-- rain -->
+              <g id="s3-rain" class="stroke cyan" stroke-width="2" opacity="0.7">
+                <line x1="-40" y1="30" x2="-46" y2="46" />
+                <line x1="-20" y1="34" x2="-26" y2="50" />
+                <line x1="24" y1="32" x2="18" y2="48" />
+                <line x1="44" y1="30" x2="38" y2="46" />
+              </g>
+            </g>
+            <text x="180" y="208" text-anchor="middle" font-family="Space Grotesk, sans-serif"
+              font-size="34" font-weight="700" fill="#E8F4F6" id="s3-temp">18°</text>
+            <text x="180" y="228" text-anchor="middle" class="mono-label" fill="#46ECFF">THUNDERSTORM · 21:40</text>
+
+            <!-- insight cards -->
+            <g id="s3-cards">
+              <g class="ins">
+                <rect x="28" y="248" width="148" height="36" rx="8" class="stroke dim" stroke-width="1" />
+                <text x="40" y="264" class="mono-label" fill="#46ECFF">RECENT INSIGHT</text>
+                <text x="40" y="277" class="mono-label">FOCUS PEAKED 14:00</text>
+              </g>
+              <g class="ins">
+                <rect x="184" y="248" width="148" height="36" rx="8" class="stroke dim" stroke-width="1" />
+                <text x="196" y="264" class="mono-label" fill="#46ECFF">WEATHER &amp; TIME</text>
+                <text x="196" y="277" class="mono-label">RAIN EASES BY 23:00</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 · BRAIN SCAN ============ -->
+  <section class="screen flip" id="s4">
+    <div class="screen__inner">
+      <div class="screen__copy">
+        <div class="eyebrow"><span class="idx">04</span> Brain Scan</div>
+        <h2>掃描<br><em>神經網路</em>。</h2>
+        <p class="lead">線框大腦沿著輪廓一筆筆描繪,神經節點依序亮起,突觸之間訊號來回奔走——整顆腦在你眼前重新連線。</p>
+        <p class="lead" style="margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--cyan)">ACTIVITY ··· <span id="s4-pct">0</span>% SYNCED</p>
+      </div>
+
+      <div class="screen__art">
+        <div class="art-card">
+          <svg id="svg4" viewBox="0 0 320 280" role="img" aria-label="腦波掃描">
+            <!-- scan grid -->
+            <g class="stroke dim" stroke-width="0.6" opacity="0.5">
+              <line x1="0" y1="70" x2="320" y2="70" />
+              <line x1="0" y1="140" x2="320" y2="140" />
+              <line x1="0" y1="210" x2="320" y2="210" />
+              <line x1="80" y1="0" x2="80" y2="280" />
+              <line x1="160" y1="0" x2="160" y2="280" />
+              <line x1="240" y1="0" x2="240" y2="280" />
+            </g>
+
+            <!-- brain outline + gyri -->
+            <g class="glow">
+              <path id="s4-brain" class="stroke cyan" stroke-width="2"
+                d="M104,210 C70,206 52,176 64,150 C44,132 58,96 88,98 C92,70 132,58 156,76 C176,58 216,66 222,96 C254,96 266,134 244,154 C260,180 238,212 204,206 C190,228 150,230 134,210 C124,216 112,214 104,210 Z" />
+              <path class="stroke gyrus" stroke-width="1.4" fill="none" d="M156,76 C150,110 158,150 150,200" />
+              <path class="stroke gyrus" stroke-width="1.4" fill="none" d="M104,120 C128,112 132,142 112,156 C130,166 122,188 106,188" />
+              <path class="stroke gyrus" stroke-width="1.4" fill="none" d="M196,110 C176,124 198,146 182,164 C200,176 188,196 174,196" />
+            </g>
+
+            <!-- synapse network -->
+            <g id="s4-synapses" class="stroke cyan" stroke-width="1" opacity="0.55">
+              <line x1="100" y1="130" x2="150" y2="110" />
+              <line x1="150" y1="110" x2="200" y2="135" />
+              <line x1="150" y1="110" x2="140" y2="170" />
+              <line x1="140" y1="170" x2="190" y2="180" />
+              <line x1="100" y1="130" x2="140" y2="170" />
+              <line x1="200" y1="135" x2="190" y2="180" />
+            </g>
+            <g id="s4-nodes" fill="#46ECFF">
+              <circle cx="100" cy="130" r="4" />
+              <circle cx="150" cy="110" r="5" />
+              <circle cx="200" cy="135" r="4" />
+              <circle cx="140" cy="170" r="4.5" />
+              <circle cx="190" cy="180" r="4" />
+            </g>
+            <!-- traveling pulse -->
+            <circle id="s4-pulse" r="3.5" fill="#FF5C38" class="glow" opacity="0" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · PROFILE ============ -->
+  <section class="screen" id="s5">
+    <div class="screen__inner">
+      <div class="screen__copy">
+        <div class="eyebrow"><span class="idx">05</span> Profile</div>
+        <h2>個人檔案 ·<br><em>Alexander Chen</em>。</h2>
+        <p class="lead">頭像 HUD 環分段旋轉,神經健康指標長條呼吸般起伏,開關一個個切換上線——設定頁也能是儀表。</p>
+      </div>
+
+      <div class="screen__art">
+        <div class="art-card">
+          <!-- avatar HUD -->
+          <svg id="svg5" viewBox="0 0 300 140" role="img" aria-label="個人檔案頭像" style="margin-bottom:6px">
+            <g transform="translate(58,70)">
+              <circle class="stroke dim" cx="0" cy="0" r="40" />
+              <circle id="s5-ring" class="stroke cyan glow" cx="0" cy="0" r="40"
+                stroke-width="3" stroke-dasharray="34 18" transform="rotate(-90)" />
+              <circle cx="0" cy="-6" r="11" class="stroke" stroke-width="2" />
+              <path class="stroke" stroke-width="2" d="M-15,18 a15,15 0 0 1 30,0" />
+            </g>
+            <text x="112" y="56" font-family="Space Grotesk, sans-serif" font-size="20" font-weight="700" fill="#E8F4F6">Alexander Chen</text>
+            <text x="112" y="76" class="mono-label" fill="#46ECFF">NEURAL ID · 0xA1C7</text>
+            <!-- wellness mini bars -->
+            <g id="s5-well" transform="translate(112,92)">
+              <rect class="wb" x="0" y="0" width="8" height="22" rx="2" fill="#00E0C6" />
+              <rect class="wb" x="14" y="0" width="8" height="22" rx="2" fill="#00E0C6" />
+              <rect class="wb" x="28" y="0" width="8" height="22" rx="2" fill="#46ECFF" />
+              <rect class="wb" x="42" y="0" width="8" height="22" rx="2" fill="#00E0C6" />
+              <rect class="wb" x="56" y="0" width="8" height="22" rx="2" fill="#00E0C6" />
+              <rect class="wb" x="70" y="0" width="8" height="22" rx="2" fill="#FF5C38" />
+            </g>
+            <text x="200" y="100" class="mono-label">NEURAL WELLNESS</text>
+          </svg>
+
+          <div class="ui-row" data-row>
+            <div>神經健康監測<small>NEURAL WELLNESS</small></div>
+            <div class="tgl" data-tgl><span class="knob"></span></div>
+          </div>
+          <div class="ui-row" data-row>
+            <div>社交隱私<small>SOCIAL PRIVACY</small></div>
+            <div class="tgl" data-tgl><span class="knob"></span></div>
+          </div>
+          <div class="ui-row" data-row style="border-bottom:none">
+            <div>專注模式 · 自動排程<small>FOCUS · AUTO SCHEDULE</small></div>
+            <div class="tgl" data-tgl><span class="knob"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 06 · SMART HOME · SCENE PRESETS ============ -->
+  <section class="screen flip" id="s6">
+    <div class="screen__inner">
+      <div class="screen__copy">
+        <div class="eyebrow"><span class="idx">06</span> Smart Home</div>
+        <h2>場景 ·<br><em>智慧家庭</em>。</h2>
+        <p class="lead">房間圖示依序點亮,場景預設環各自填充到位,選中的場景持續脈動——一眼掌控整個空間。</p>
+      </div>
+
+      <div class="screen__art">
+        <div class="art-card">
+          <svg id="svg6" viewBox="0 0 360 300" role="img" aria-label="智慧家庭場景">
+            <!-- room tiles 3x2 -->
+            <g id="s6-tiles">
+              <!-- each tile: rect + simple icon -->
+              <g class="tile" transform="translate(28,24)">
+                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
+                <circle cx="46" cy="32" r="11" class="stroke cyan" stroke-width="2" />
+                <line x1="46" y1="43" x2="46" y2="52" class="stroke cyan" stroke-width="2" />
+                <text x="46" y="68" text-anchor="middle" class="mono-label">LIVING</text>
+              </g>
+              <g class="tile" transform="translate(134,24)">
+                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
+                <rect x="34" y="22" width="24" height="18" rx="3" class="stroke cyan" stroke-width="2" />
+                <line x1="46" y1="40" x2="46" y2="50" class="stroke cyan" stroke-width="2" />
+                <text x="46" y="68" text-anchor="middle" class="mono-label">BEDROOM</text>
+              </g>
+              <g class="tile" transform="translate(240,24)">
+                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
+                <path d="M38,40 L46,22 L54,40 Z" class="stroke cyan" stroke-width="2" fill="none" />
+                <text x="46" y="68" text-anchor="middle" class="mono-label">OFFICE</text>
+              </g>
+              <g class="tile" transform="translate(28,112)">
+                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
+                <circle cx="46" cy="32" r="10" class="stroke cyan" stroke-width="2" />
+                <path d="M40,32 a6,6 0 0 0 12,0" class="stroke cyan" stroke-width="2" fill="none" />
+                <text x="46" y="68" text-anchor="middle" class="mono-label">KITCHEN</text>
+              </g>
+              <g class="tile" transform="translate(134,112)">
+                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
+                <polygon points="46,22 56,30 52,42 40,42 36,30" class="stroke cyan" stroke-width="2" fill="none" />
+                <text x="46" y="68" text-anchor="middle" class="mono-label">GARDEN</text>
+              </g>
+              <g class="tile" transform="translate(240,112)">
+                <rect width="92" height="76" rx="10" class="stroke dim" stroke-width="1" />
+                <rect x="36" y="24" width="20" height="16" rx="2" class="stroke cyan" stroke-width="2" />
+                <circle cx="46" cy="32" r="4" class="stroke cyan" stroke-width="2" />
+                <text x="46" y="68" text-anchor="middle" class="mono-label">CAMERA</text>
+              </g>
+            </g>
+
+            <!-- scene preset rings -->
+            <text x="30" y="218" class="mono-label">SCENE PRESETS</text>
+            <g id="s6-scenes">
+              <g transform="translate(72,256)">
+                <circle class="stroke dim" cx="0" cy="0" r="24" stroke-width="4" />
+                <circle class="sc" cx="0" cy="0" r="24" stroke-width="4" transform="rotate(-90)"
+                  fill="none" stroke="#46ECFF" stroke-linecap="round" />
+                <text x="0" y="4" text-anchor="middle" class="mono-label">DAWN</text>
+              </g>
+              <g transform="translate(180,256)">
+                <circle class="stroke dim" cx="0" cy="0" r="24" stroke-width="4" />
+                <circle class="sc" cx="0" cy="0" r="24" stroke-width="4" transform="rotate(-90)"
+                  fill="none" stroke="#00E0C6" stroke-linecap="round" />
+                <text x="0" y="4" text-anchor="middle" class="mono-label">FOCUS</text>
+              </g>
+              <g transform="translate(288,256)">
+                <circle class="stroke dim" cx="0" cy="0" r="24" stroke-width="4" />
+                <circle class="sc" cx="0" cy="0" r="24" stroke-width="4" transform="rotate(-90)"
+                  fill="none" stroke="#FF5C38" stroke-linecap="round" />
+                <text x="0" y="4" text-anchor="middle" class="mono-label">NIGHT</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="big">六個畫面,一套神經介面。</div>
+    <div class="metaf">
+      全部動態 SVG · GSAP 驅動 · 尊重 prefers-reduced-motion<br>
+      <a href="ad-modules.html">← 廣告模組</a> &nbsp;·&nbsp;
+      <a href="advanced.html">進階標本表 II</a> &nbsp;·&nbsp;
+      <a href="index.html">標本表 I</a>
+    </div>
+  </footer>
+
+  <!-- GSAP + plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* top progress bar */
+    gsap.to("#topbar", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: 0.3 } });
+
+    /* side-rail active dot */
+    document.querySelectorAll(".screen").forEach((sec, i) => {
+      const dots = document.querySelectorAll(".rail a");
+      ScrollTrigger.create({
+        trigger: sec, start: "top center", end: "bottom center",
+        onToggle: (self) => { if (self.isActive && dots[i]) { dots.forEach(d => d.classList.remove("on")); dots[i].classList.add("on"); } }
+      });
+    });
+
+    /* helper: prep a path/circle for a self-draw (stroke-dashoffset) */
+    function prepDraw(el) {
+      const len = (el.getTotalLength ? el.getTotalLength() : 0) || 1;
+      gsap.set(el, { strokeDasharray: len, strokeDashoffset: len });
+      return len;
+    }
+
+    /* run each screen's effect once it scrolls into view, plus its ambient loop */
+    function onView(trigger, fn) {
+      ScrollTrigger.create({ trigger, start: "top 70%", once: true, onEnter: fn });
+    }
+
+    const mm = gsap.matchMedia();
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+
+      /* ---------- 01 · login ---------- */
+      (() => {
+        const svg = document.querySelector("#svg1");
+        const rings = ["#s1-r1", "#s1-r3"].map(s => svg.querySelector(s));
+        const arc = svg.querySelector("#s1-arc");
+        const r2 = svg.querySelector("#s1-r2");
+        const net = svg.querySelectorAll("#s1-net line");
+        const stars = svg.querySelectorAll("#s1-stars circle");
+        const ticks = svg.querySelector("#s1-ticks");
+        const word = svg.querySelector("#s1-word"), sub = svg.querySelector("#s1-sub");
+        const logins = document.querySelectorAll("[data-login]");
+
+        rings.forEach(prepDraw);
+        const arcLen = prepDraw(arc);
+        gsap.set([word, sub], { autoAlpha: 0 });
+        gsap.set(stars, { scale: 0, transformOrigin: "50% 50%" });
+        gsap.set(logins, { autoAlpha: 0, y: 14 });
+        net.forEach(l => prepDraw(l));
+
+        onView("#s1", () => {
+          const tl = gsap.timeline();
+          tl.to(net, { strokeDashoffset: 0, duration: 0.8, stagger: 0.06, ease: "power2.out" })
+            .to(stars, { scale: 1, duration: 0.4, stagger: 0.05, ease: "back.out(2)" }, "-=0.7")
+            .to(rings, { strokeDashoffset: 0, duration: 1.1, stagger: 0.15, ease: "power2.inOut" }, "-=0.3")
+            .to(arc, { strokeDashoffset: 0, duration: 0.7, ease: "power2.out" }, "-=0.6")
+            .to([word, sub], { autoAlpha: 1, duration: 0.5, stagger: 0.12 }, "-=0.2")
+            .to(logins, { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.1 }, "-=0.1");
+
+          // ambient: counter-rotating rings + dashed ring spin
+          gsap.to(arc, { rotation: 360, transformOrigin: "50% 50%", svgOrigin: "180 150", duration: 18, repeat: -1, ease: "none" });
+          gsap.to(r2, { rotation: -360, transformOrigin: "50% 50%", svgOrigin: "180 150", duration: 26, repeat: -1, ease: "none" });
+          gsap.to(ticks, { rotation: 360, transformOrigin: "50% 50%", svgOrigin: "180 150", duration: 40, repeat: -1, ease: "none" });
+          gsap.to(stars, { autoAlpha: 0.4, duration: 1.2, stagger: { each: 0.3, repeat: -1, yoyo: true }, ease: "sine.inOut" });
+        });
+      })();
+
+      /* ---------- 02 · dashboard ---------- */
+      (() => {
+        const svg = document.querySelector("#svg2");
+        const line = svg.querySelector("#s2-line"), line2 = svg.querySelector("#s2-line2");
+        const bars = svg.querySelectorAll("#s2-bars .bar");
+        const vbs = svg.querySelectorAll("#s2-voice .vb");
+        const donut = svg.querySelector("#s2-donut"), donutVal = svg.querySelector("#s2-donut-val");
+        const heights = [26, 40, 32, 52, 60, 36];
+
+        prepDraw(line);
+        gsap.set(line2, { autoAlpha: 0 });
+        const dLen = donut.getTotalLength();
+        gsap.set(donut, { strokeDasharray: dLen, strokeDashoffset: dLen });
+
+        onView("#s2", () => {
+          const tl = gsap.timeline();
+          tl.to(line, { strokeDashoffset: 0, duration: 1.3, ease: "power2.out" })
+            .to(line2, { autoAlpha: 0.35, duration: 0.4 }, "-=0.5")
+            .to(bars, {
+              attr: { height: (i) => heights[i], y: (i) => 280 - heights[i] },
+              duration: 0.7, stagger: 0.08, ease: "back.out(1.6)"
+            }, "-=0.8");
+
+          // donut count to 84%
+          const c = { v: 0 }, target = 84;
+          tl.to(donut, { strokeDashoffset: dLen * (1 - target / 100), duration: 1, ease: "power2.out" }, "-=0.4")
+            .to(c, { v: target, duration: 1, ease: "power2.out", onUpdate: () => donutVal.textContent = Math.round(c.v) + "%" }, "<");
+
+          // ambient: voice bars dance, echo line scrolls, neural line breathes
+          vbs.forEach((b, i) => {
+            gsap.to(b, {
+              attr: { y1: () => -gsap.utils.random(4, 22), y2: () => gsap.utils.random(4, 22) },
+              duration: 0.4 + i * 0.05, repeat: -1, yoyo: true, repeatRefresh: true, ease: "sine.inOut"
+            });
+          });
+          gsap.fromTo(line2, { x: 0 }, { x: -28, duration: 1.4, repeat: -1, ease: "none" });
+          gsap.to(line, { y: "+=4", duration: 1.8, repeat: -1, yoyo: true, ease: "sine.inOut" });
+        });
+      })();
+
+      /* ---------- 03 · weather ---------- */
+      (() => {
+        const svg = document.querySelector("#svg3");
+        const cloud = svg.querySelector("#s3-cloud"), bolt = svg.querySelector("#s3-bolt");
+        const rain = svg.querySelectorAll("#s3-rain line");
+        const cards = svg.querySelectorAll("#s3-cards .ins");
+        const temp = svg.querySelector("#s3-temp");
+
+        prepDraw(cloud); prepDraw(bolt);
+        gsap.set(rain, { autoAlpha: 0 });
+        gsap.set(cards, { autoAlpha: 0, y: 12 });
+        gsap.set(temp, { autoAlpha: 0 });
+
+        onView("#s3", () => {
+          const tl = gsap.timeline();
+          tl.to(cloud, { strokeDashoffset: 0, duration: 1, ease: "power2.out" })
+            .to(temp, { autoAlpha: 1, duration: 0.4 }, "-=0.3")
+            .to(bolt, { strokeDashoffset: 0, duration: 0.4, ease: "power1.in" }, "-=0.2")
+            .to(rain, { autoAlpha: 0.7, duration: 0.3 }, "-=0.1")
+            .to(cards, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.12 }, "-=0.2");
+
+          // ambient: cloud drift, rain fall loop, lightning flash
+          // NOTE: relative "+=" keeps the group's translate(180,96) base intact
+          gsap.to(svg.querySelector("#s3-weather"), { x: "+=10", duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" });
+          rain.forEach((r, i) => {
+            gsap.fromTo(r, { y: -8, autoAlpha: 0 },
+              { y: 20, autoAlpha: 0.8, duration: 0.7, repeat: -1, delay: i * 0.18, ease: "power1.in",
+                onRepeat() { gsap.set(r, { y: -8 }); } });
+          });
+          gsap.to(bolt, { autoAlpha: 0.15, duration: 0.12, repeat: -1, repeatDelay: 2.6, yoyo: true, ease: "none" });
+        });
+      })();
+
+      /* ---------- 04 · brain scan ---------- */
+      (() => {
+        const svg = document.querySelector("#svg4");
+        const brain = svg.querySelector("#s4-brain");
+        const gyri = svg.querySelectorAll(".gyrus");
+        const synapses = svg.querySelectorAll("#s4-synapses line");
+        const nodes = svg.querySelectorAll("#s4-nodes circle");
+        const pulse = svg.querySelector("#s4-pulse");
+        const pct = document.querySelector("#s4-pct");
+
+        prepDraw(brain);
+        gyri.forEach(prepDraw);
+        synapses.forEach(prepDraw);
+        gsap.set(nodes, { scale: 0, transformOrigin: "50% 50%" });
+
+        onView("#s4", () => {
+          const tl = gsap.timeline();
+          const c = { v: 0 };
+          tl.to(brain, { strokeDashoffset: 0, duration: 1.6, ease: "power2.inOut" })
+            .to(c, { v: 100, duration: 1.6, ease: "power2.inOut", onUpdate: () => pct.textContent = Math.round(c.v) }, "<")
+            .to(gyri, { strokeDashoffset: 0, duration: 0.9, stagger: 0.15, ease: "power2.out" }, "-=0.9")
+            .to(synapses, { strokeDashoffset: 0, duration: 0.6, stagger: 0.08, ease: "power2.out" }, "-=0.6")
+            .to(nodes, { scale: 1, duration: 0.4, stagger: 0.08, ease: "back.out(2.2)" }, "-=0.4");
+
+          // ambient: nodes pulse; a signal travels node→node forever
+          gsap.to(nodes, { scale: 1.35, transformOrigin: "50% 50%", duration: 0.9,
+            stagger: { each: 0.18, repeat: -1, yoyo: true }, ease: "sine.inOut" });
+
+          const path = [[100,130],[150,110],[200,135],[190,180],[140,170],[100,130]];
+          gsap.set(pulse, { attr: { cx: path[0][0], cy: path[0][1] }, autoAlpha: 1 });
+          const travel = gsap.timeline({ repeat: -1 });
+          path.slice(1).forEach(p => travel.to(pulse, { attr: { cx: p[0], cy: p[1] }, duration: 0.55, ease: "power1.inOut" }));
+        });
+      })();
+
+      /* ---------- 05 · profile ---------- */
+      (() => {
+        const svg = document.querySelector("#svg5");
+        const ring = svg.querySelector("#s5-ring");
+        const wbs = svg.querySelectorAll("#s5-well .wb");
+        const rows = document.querySelectorAll("#s5 [data-row]");
+        const tgls = document.querySelectorAll("#s5 [data-tgl]");
+        const fullH = 22;
+
+        gsap.set(rows, { autoAlpha: 0, x: 16 });
+        gsap.set(wbs, { transformOrigin: "50% 100%", scaleY: 0.2 });
+
+        onView("#s5", () => {
+          const tl = gsap.timeline();
+          tl.from(ring, { rotation: -180, transformOrigin: "50% 50%", svgOrigin: "58 70", autoAlpha: 0, duration: 0.9, ease: "power2.out" })
+            .to(wbs, { scaleY: 1, duration: 0.5, stagger: 0.06, ease: "power2.out" }, "-=0.4")
+            .to(rows, { autoAlpha: 1, x: 0, duration: 0.45, stagger: 0.14, ease: "power2.out" }, "-=0.3");
+
+          // toggles flip on, one after another
+          tgls.forEach((t, i) => {
+            const knob = t.querySelector(".knob");
+            tl.to(knob, { x: 22, backgroundColor: "#070B10", duration: 0.3, ease: "back.out(2)" }, ">-0.05")
+              .to(t, { borderColor: "var(--cyan)", backgroundColor: "rgba(70,236,255,0.18)", duration: 0.3 }, "<");
+          });
+
+          // ambient: segmented ring spins, wellness bars breathe
+          gsap.to(ring, { rotation: "+=360", transformOrigin: "50% 50%", svgOrigin: "58 70", duration: 12, repeat: -1, ease: "none" });
+          wbs.forEach((b, i) => {
+            gsap.to(b, { scaleY: () => gsap.utils.random(0.4, 1), transformOrigin: "50% 100%",
+              duration: 0.6 + i * 0.05, repeat: -1, yoyo: true, repeatRefresh: true, ease: "sine.inOut" });
+          });
+        });
+      })();
+
+      /* ---------- 06 · smart home ---------- */
+      (() => {
+        const svg = document.querySelector("#svg6");
+        const tiles = svg.querySelectorAll("#s6-tiles .tile");
+        const scenes = svg.querySelectorAll("#s6-scenes .sc");
+        const targets = [0.85, 0.6, 0.4];
+
+        // reveal via opacity + scale only — the tiles carry their own
+        // translate(x,y); animating x/y here would clobber that base position
+        gsap.set(tiles, { autoAlpha: 0, scale: 0.9, transformOrigin: "50% 50%" });
+        scenes.forEach(s => {
+          const len = s.getTotalLength();
+          s.dataset.len = len;
+          gsap.set(s, { strokeDasharray: len, strokeDashoffset: len });
+        });
+
+        onView("#s6", () => {
+          const tl = gsap.timeline();
+          tl.to(tiles, { autoAlpha: 1, scale: 1, duration: 0.45, stagger: 0.08, ease: "power2.out" });
+          scenes.forEach((s, i) => {
+            const len = +s.dataset.len;
+            tl.to(s, { strokeDashoffset: len * (1 - targets[i]), duration: 0.8, ease: "power2.out" }, i === 0 ? "-=0.2" : "<+0.15");
+          });
+
+          // ambient: tiles' icons glow in sequence; the active (FOCUS) scene pulses
+          gsap.to(tiles, { filter: "drop-shadow(0 0 6px var(--cyan))", duration: 0.6,
+            stagger: { each: 0.25, repeat: -1, yoyo: true }, ease: "sine.inOut" });
+          gsap.to(scenes[1], { opacity: 0.45, duration: 0.8, repeat: -1, yoyo: true, ease: "sine.inOut" });
+        });
+      })();
+
+    });
+
+    /* reduced motion: nothing is hidden by JS, so the SVGs render in their
+       final drawn state from the markup. just fill the live counters. */
+    mm.add("(prefers-reduced-motion: reduce)", () => {
+      const p = document.querySelector("#s4-pct"); if (p) p.textContent = "100";
+      const d = document.querySelector("#s2-donut-val"); if (d) d.textContent = "84%";
+      // performance bars start at height 0 in markup; give them their values
+      const heights = [26, 40, 32, 52, 60, 36];
+      document.querySelectorAll("#s2-bars .bar").forEach((b, i) => {
+        b.setAttribute("height", heights[i]);
+        b.setAttribute("y", 280 - heights[i]);
+      });
+    });
+
+    /* refresh once fonts settle so triggers measure correctly */
+    document.fonts.ready.then(() => ScrollTrigger.refresh());
+    window.addEventListener("load", () => ScrollTrigger.refresh());
+  </script>
+</body>
+
+</html>

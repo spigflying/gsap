@@ -9,6 +9,7 @@
 | **標本表 I** | [index.html](https://spigflying.github.io/gsap/) | 核心能力：Tween / Ease、Timeline、ScrollTrigger、SplitText、Draggable、Flip |
 | **標本表 II** | [advanced.html](https://spigflying.github.io/gsap/advanced.html) | 進階方向：MotionPath、DrawSVG、MorphSVG、ScrollSmoother |
 | **廣告模組** | [ad-modules.html](https://spigflying.github.io/gsap/ad-modules.html) | 同一個數位廣告版型 × 三種捲動進場效果（3D 翻入、景深推進、遮罩橫掃） |
+| **NEUROSPHERE** | [neurosphere.html](https://spigflying.github.io/gsap/neurosphere.html) | 神經介面概念 × 六個畫面，全用動態 SVG：登入光環、神經活動儀表、天氣洞察、腦波掃描、個人檔案、智慧家庭 |
 
 ## 用到的 GSAP plugins
 
