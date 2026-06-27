@@ -315,6 +315,132 @@
       background: #E8EDF2;
     }
 
+    /* ---- 04 · 太空艙 HUD：corner accent 的科技感變化版 ---- */
+    .ad[data-fx="dashboard"] {
+      background:
+        radial-gradient(circle at 85% -10%, rgba(0, 224, 198, 0.14), transparent 55%),
+        repeating-linear-gradient(135deg, rgba(0, 224, 198, 0.035) 0 2px, transparent 2px 18px),
+        linear-gradient(180deg, var(--panel), var(--panel-2));
+    }
+
+    .ad[data-fx="dashboard"]::before {
+      display: none;
+      /* replaced by the 4-corner HUD brackets below */
+    }
+
+    .ad[data-fx="dashboard"] .ad__title .lead {
+      text-shadow: 0 0 20px rgba(0, 224, 198, .35);
+    }
+
+    .ad__hud-corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      pointer-events: none;
+    }
+
+    .ad__hud-corner::after {
+      content: "";
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--signal);
+      box-shadow: 0 0 8px var(--signal);
+    }
+
+    .ad__hud-corner.tl { left: 16px; top: 16px; border-top: 2px solid var(--line); border-left: 2px solid var(--line); transform-origin: 0% 0%; }
+    .ad__hud-corner.tl::after { left: -2.5px; top: -2.5px; }
+    .ad__hud-corner.tr { right: 16px; top: 16px; border-top: 2px solid var(--line); border-right: 2px solid var(--line); transform-origin: 100% 0%; }
+    .ad__hud-corner.tr::after { right: -2.5px; top: -2.5px; }
+    .ad__hud-corner.bl { left: 16px; bottom: 16px; border-bottom: 2px solid var(--line); border-left: 2px solid var(--line); transform-origin: 0% 100%; }
+    .ad__hud-corner.bl::after { left: -2.5px; bottom: -2.5px; }
+    .ad__hud-corner.br { right: 16px; bottom: 16px; border-bottom: 2px solid var(--line); border-right: 2px solid var(--line); transform-origin: 100% 100%; }
+    .ad__hud-corner.br::after { right: -2.5px; bottom: -2.5px; }
+
+    .ad__hud-scan {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--line), transparent);
+      box-shadow: 0 0 14px var(--line);
+      opacity: .75;
+      pointer-events: none;
+    }
+
+    .ad__hud-leds {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .ad__hud-led {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--line);
+      box-shadow: 0 0 6px var(--line);
+    }
+
+    .ad[data-fx="dashboard"] .ad__row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .ad[data-fx="dashboard"] .ad__row-i {
+      flex: 1;
+    }
+
+    .ad__gauge-wrap {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+    }
+
+    .ad__gauge {
+      transform: rotate(-90deg);
+    }
+
+    .ad__gauge-bg {
+      fill: none;
+      stroke: var(--hairline);
+      stroke-width: 3;
+    }
+
+    .ad__gauge-fg {
+      fill: none;
+      stroke: var(--line);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dashoffset: 94.2;
+      filter: drop-shadow(0 0 4px var(--line));
+    }
+
+    .ad[data-fx="dashboard"] .ad__row:nth-child(2) .ad__gauge-fg {
+      stroke: var(--signal);
+      filter: drop-shadow(0 0 4px var(--signal));
+    }
+
+    .ad[data-fx="dashboard"] .ad__row:nth-child(3) .ad__gauge-fg {
+      stroke: #E8EDF2;
+      filter: drop-shadow(0 0 4px #E8EDF2);
+    }
+
+    .ad__gauge-val {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--lo);
+    }
+
     footer {
       padding: 80px 0 110px;
       text-align: center;
@@ -354,13 +480,13 @@
     <!-- INTRO -->
     <header class="intro">
       <div class="kicker">Ad Module Lab</div>
-      <h1>同一個版型，<br><em>三種</em>進場。</h1>
+      <h1>同一個版型，<br><em>四種</em>進場。</h1>
       <p>
         一個外框、一行 AI 導讀、三個橫向並排的文字框——這是數位廣告最常見的模組。
-        下面用同一份版型重複三次，每一次換一種 GSAP 效果，<b style="color:var(--hi)">捲到畫面內才開始播</b>。
+        下面用同一份版型重複四次，每一次換一種 GSAP 效果，<b style="color:var(--hi)">捲到畫面內才開始播</b>。
       </p>
       <div class="legend">
-        <span>01 · 3D 翻入</span><span>02 · 景深推進</span><span>03 · 遮罩橫掃</span>
+        <span>01 · 3D 翻入</span><span>02 · 景深推進</span><span>03 · 遮罩橫掃</span><span>04 · 太空艙 HUD</span>
       </div>
     </header>
 
@@ -410,6 +536,16 @@
           "標題逐字浮現，閱讀節奏被精準掌控。",
           "適合資訊型廣告，條列重點清楚好讀。"]
       },
+
+      {
+        fx: "dashboard", name: "太空艙 HUD / 儀表板掃描",
+        title: "AI 導讀：登艙啟動，座艙儀表全面同步。",
+        rows: [
+          { text: "即時遙測同步更新，座艙資訊一覽無遺。", value: 92 },
+          { text: "全頻雷達掃描，異常訊號秒級鎖定。", value: 78 },
+          { text: "推進系統狀態監控，讀數即時跳動回饋。", value: 95 },
+        ]
+      },
     ];
 
     /* ---------- build markup (DRY: same layout every time) ---------- */
@@ -417,13 +553,40 @@
     MODULES.forEach((m, i) => {
       const stop = document.createElement("section");
       stop.className = "ad-stop";
+      const isDashboard = m.fx === "dashboard";
+
+      const rowsHtml = m.rows.map((row, ri) => {
+        if (isDashboard) {
+          return `<p class="ad__row">
+            <span class="ad__gauge-wrap">
+              <svg class="ad__gauge" viewBox="0 0 36 36" width="38" height="38">
+                <circle class="ad__gauge-bg" cx="18" cy="18" r="15" />
+                <circle class="ad__gauge-fg" cx="18" cy="18" r="15" data-value="${row.value}" style="stroke-dasharray:94.2" />
+              </svg>
+              <span class="ad__gauge-val">0%</span>
+            </span>
+            <span class="ad__row-i">${row.text}</span>
+          </p>`;
+        }
+        return `<p class="ad__row"><span class="ad__row-i"><span class="ad__num">0${ri + 1}</span>${row}</span><span class="ad__line"></span></p>`;
+      }).join("");
+
+      const hudMarkup = isDashboard ? `
+        <div class="ad__hud-corner tl"></div>
+        <div class="ad__hud-corner tr"></div>
+        <div class="ad__hud-corner bl"></div>
+        <div class="ad__hud-corner br"></div>
+        <div class="ad__hud-scan"></div>` : "";
+
+      const ledsMarkup = isDashboard
+        ? `<span class="ad__hud-leds"><span class="ad__hud-led"></span><span class="ad__hud-led"></span><span class="ad__hud-led"></span></span>`
+        : "";
+
       stop.innerHTML = `
-    <article class="ad" data-fx="${m.fx}">
-      <div class="ad__badge"><span class="no">MODULE ${String(i + 1).padStart(2, "0")}</span> · EFFECT / ${m.name}</div>
+    <article class="ad" data-fx="${m.fx}">${hudMarkup}
+      <div class="ad__badge"><span class="no">MODULE ${String(i + 1).padStart(2, "0")}</span> · EFFECT / ${m.name}${ledsMarkup}</div>
       <h2 class="ad__title"><span class="lead">${m.title}</span></h2>
-      <div class="ad__rows">
-        ${m.rows.map((t, ri) => `<p class="ad__row"><span class="ad__row-i"><span class="ad__num">0${ri + 1}</span>${t}</span><span class="ad__line"></span></p>`).join("")}
-      </div>
+      <div class="ad__rows">${rowsHtml}</div>
     </article>`;
       host.appendChild(stop);
     });
@@ -482,6 +645,50 @@
             xPercent: (i) => i % 2 ? 110 : -110, autoAlpha: 0,
             stagger: 0.14, duration: 0.6, ease: "power3.out"
           }, "-=0.3");
+      },
+
+      // 04 · spaceship cockpit HUD — corners snap in like a power-on sequence,
+      //      title types on char by char, rows rise while their gauges sweep up.
+      //      a radar scanline and blinking status LEDs loop for as long as the page lives.
+      dashboard(ad, title, rows) {
+        const titleChars = new SplitText(title, { type: "chars" }).chars;
+        const gauges = ad.querySelectorAll(".ad__gauge-fg");
+        const gaugeVals = ad.querySelectorAll(".ad__gauge-val");
+        const corners = ad.querySelectorAll(".ad__hud-corner");
+        const leds = ad.querySelectorAll(".ad__hud-led");
+        const scan = ad.querySelector(".ad__hud-scan");
+
+        gsap.set(ad, { autoAlpha: 0, y: 26 });
+        gsap.set(corners, { scale: 0, autoAlpha: 0 });
+        gsap.set(titleChars, { autoAlpha: 0 });
+        gsap.set(rows, { autoAlpha: 0, y: 16 });
+
+        const tl = gsap.timeline({ scrollTrigger: { trigger: ad, start: "top 75%", toggleActions: "play none none reverse" } });
+
+        tl.to(ad, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" })
+          .to(corners, { scale: 1, autoAlpha: 1, duration: 0.45, stagger: 0.07, ease: "back.out(2.4)" }, "-=0.2")
+          .to(titleChars, { autoAlpha: 1, stagger: 0.02, duration: 0.01 }, "-=0.1")
+          .to(rows, { autoAlpha: 1, y: 0, stagger: 0.16, duration: 0.5, ease: "power2.out" }, "-=0.2");
+
+        gauges.forEach((g, i) => {
+          const val = parseFloat(g.dataset.value);
+          const offset = 94.2 * (1 - val / 100);
+          const counter = { v: 0 };
+          tl.to(g, { strokeDashoffset: offset, duration: 0.9, ease: "power2.out" }, i === 0 ? "-=0.1" : "<")
+            .to(counter, {
+              v: val, duration: 0.9, ease: "power2.out",
+              onUpdate: () => { if (gaugeVals[i]) gaugeVals[i].textContent = Math.round(counter.v) + "%"; }
+            }, "<");
+        });
+
+        // ambient HUD loops — kick off once and keep running for the page's lifetime
+        ScrollTrigger.create({
+          trigger: ad, start: "top 85%", once: true,
+          onEnter: () => {
+            gsap.fromTo(scan, { top: "0%" }, { top: "100%", duration: 2.6, repeat: -1, ease: "sine.inOut" });
+            gsap.to(leds, { autoAlpha: 0.15, duration: 0.45, stagger: { each: 0.18, repeat: -1, yoyo: true } });
+          }
+        });
       }
     };
 
