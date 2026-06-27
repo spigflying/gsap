@@ -315,68 +315,116 @@
       background: #E8EDF2;
     }
 
-    /* ---- 04 · 太空艙 HUD：corner accent 的科技感變化版 ---- */
+    /* ---- 04 · 太空艙遙測座艙：左上角 corner accent 演進為四角自繪 HUD 框 ---- */
     .ad[data-fx="dashboard"] {
       background:
-        radial-gradient(circle at 85% -10%, rgba(0, 224, 198, 0.14), transparent 55%),
-        repeating-linear-gradient(135deg, rgba(0, 224, 198, 0.035) 0 2px, transparent 2px 18px),
+        radial-gradient(120% 80% at 50% -20%, rgba(0, 224, 198, 0.09), transparent 60%),
         linear-gradient(180deg, var(--panel), var(--panel-2));
     }
 
+    /* the single top-left bracket grows into a full four-corner drawn frame */
     .ad[data-fx="dashboard"]::before {
       display: none;
-      /* replaced by the 4-corner HUD brackets below */
+    }
+
+    .ad__hud {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .ad__hud i {
+      position: absolute;
+      background: var(--line);
+      box-shadow: 0 0 8px rgba(0, 224, 198, .5);
+    }
+
+    .ad__hud .h { height: 2px; width: 100%; }
+    .ad__hud .v { width: 2px; height: 100%; }
+
+    /* a small signal node at each vertex */
+    .ad__hud::after {
+      content: "";
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--signal);
+      box-shadow: 0 0 7px var(--signal);
+    }
+
+    .ad__hud.tl { left: 14px; top: 14px; }
+    .ad__hud.tl .h { left: 0; top: 0; transform-origin: left; }
+    .ad__hud.tl .v { left: 0; top: 0; transform-origin: top; }
+    .ad__hud.tl::after { left: -1px; top: -1px; }
+    .ad__hud.tr { right: 14px; top: 14px; }
+    .ad__hud.tr .h { right: 0; top: 0; transform-origin: right; }
+    .ad__hud.tr .v { right: 0; top: 0; transform-origin: top; }
+    .ad__hud.tr::after { right: -1px; top: -1px; }
+    .ad__hud.bl { left: 14px; bottom: 14px; }
+    .ad__hud.bl .h { left: 0; bottom: 0; transform-origin: left; }
+    .ad__hud.bl .v { left: 0; bottom: 0; transform-origin: bottom; }
+    .ad__hud.bl::after { left: -1px; bottom: -1px; }
+    .ad__hud.br { right: 14px; bottom: 14px; }
+    .ad__hud.br .h { right: 0; bottom: 0; transform-origin: right; }
+    .ad__hud.br .v { right: 0; bottom: 0; transform-origin: bottom; }
+    .ad__hud.br::after { right: -1px; bottom: -1px; }
+
+    /* "SYSTEMS ONLINE" status light, top-right of the console */
+    .ad__status {
+      position: absolute;
+      right: clamp(24px, 4vw, 44px);
+      top: clamp(22px, 3.5vw, 40px);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .22em;
+      color: var(--line);
+      z-index: 2;
+    }
+
+    .ad__status .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--line);
+      box-shadow: 0 0 8px var(--line);
+    }
+
+    .ad[data-fx="dashboard"] .ad__title {
+      max-width: 30ch;
     }
 
     .ad[data-fx="dashboard"] .ad__title .lead {
-      text-shadow: 0 0 20px rgba(0, 224, 198, .35);
+      text-shadow: 0 0 22px rgba(0, 224, 198, .3);
     }
 
-    .ad__hud-corner {
-      position: absolute;
-      width: 30px;
-      height: 30px;
-      pointer-events: none;
+    /* three telemetry channels, side by side */
+    .ad[data-fx="dashboard"] .ad__row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--hairline);
+      border-top: 1px solid var(--hairline);
+      border-radius: 10px;
+      padding: 16px 16px 18px;
     }
 
-    .ad__hud-corner::after {
-      content: "";
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--signal);
-      box-shadow: 0 0 8px var(--signal);
-    }
-
-    .ad__hud-corner.tl { left: 16px; top: 16px; border-top: 2px solid var(--line); border-left: 2px solid var(--line); transform-origin: 0% 0%; }
-    .ad__hud-corner.tl::after { left: -2.5px; top: -2.5px; }
-    .ad__hud-corner.tr { right: 16px; top: 16px; border-top: 2px solid var(--line); border-right: 2px solid var(--line); transform-origin: 100% 0%; }
-    .ad__hud-corner.tr::after { right: -2.5px; top: -2.5px; }
-    .ad__hud-corner.bl { left: 16px; bottom: 16px; border-bottom: 2px solid var(--line); border-left: 2px solid var(--line); transform-origin: 0% 100%; }
-    .ad__hud-corner.bl::after { left: -2.5px; bottom: -2.5px; }
-    .ad__hud-corner.br { right: 16px; bottom: 16px; border-bottom: 2px solid var(--line); border-right: 2px solid var(--line); transform-origin: 100% 100%; }
-    .ad__hud-corner.br::after { right: -2.5px; bottom: -2.5px; }
-
-    .ad__hud-scan {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--line), transparent);
-      box-shadow: 0 0 14px var(--line);
-      opacity: .75;
-      pointer-events: none;
-    }
-
-    .ad__hud-leds {
+    .tlm__head {
       display: flex;
-      gap: 6px;
-      margin-left: auto;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .14em;
+      color: var(--lo);
     }
 
-    .ad__hud-led {
+    .tlm__dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
@@ -384,60 +432,61 @@
       box-shadow: 0 0 6px var(--line);
     }
 
-    .ad[data-fx="dashboard"] .ad__row {
+    .ad[data-fx="dashboard"] .ad__row:nth-child(2) .tlm__dot { background: var(--signal); box-shadow: 0 0 6px var(--signal); }
+    .ad[data-fx="dashboard"] .ad__row:nth-child(3) .tlm__dot { background: #E8EDF2; box-shadow: 0 0 6px #E8EDF2; }
+
+    .tlm__read {
       display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .ad[data-fx="dashboard"] .ad__row-i {
-      flex: 1;
-    }
-
-    .ad__gauge-wrap {
-      position: relative;
-      width: 38px;
-      height: 38px;
-      flex-shrink: 0;
-    }
-
-    .ad__gauge {
-      transform: rotate(-90deg);
-    }
-
-    .ad__gauge-bg {
-      fill: none;
-      stroke: var(--hairline);
-      stroke-width: 3;
-    }
-
-    .ad__gauge-fg {
-      fill: none;
-      stroke: var(--line);
-      stroke-width: 3;
-      stroke-linecap: round;
-      stroke-dashoffset: 94.2;
-      filter: drop-shadow(0 0 4px var(--line));
-    }
-
-    .ad[data-fx="dashboard"] .ad__row:nth-child(2) .ad__gauge-fg {
-      stroke: var(--signal);
-      filter: drop-shadow(0 0 4px var(--signal));
-    }
-
-    .ad[data-fx="dashboard"] .ad__row:nth-child(3) .ad__gauge-fg {
-      stroke: #E8EDF2;
-      filter: drop-shadow(0 0 4px #E8EDF2);
-    }
-
-    .ad__gauge-val {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: baseline;
+      gap: 3px;
+      margin: 10px 0 12px;
       font-family: var(--mono);
-      font-size: 10px;
+    }
+
+    .tlm__val {
+      font-size: clamp(30px, 5vw, 42px);
+      font-weight: 500;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.02em;
+      color: var(--line);
+    }
+
+    .ad[data-fx="dashboard"] .ad__row:nth-child(2) .tlm__val { color: var(--signal); }
+    .ad[data-fx="dashboard"] .ad__row:nth-child(3) .tlm__val { color: #E8EDF2; }
+
+    .tlm__unit {
+      font-size: 13px;
+      color: var(--lo);
+    }
+
+    .tlm__bar {
+      position: relative;
+      height: 8px;
+      border-radius: 3px;
+      overflow: hidden;
+      background:
+        repeating-linear-gradient(90deg, var(--hairline) 0 1px, transparent 1px 7px),
+        rgba(255, 255, 255, 0.04);
+    }
+
+    .tlm__fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      transform-origin: left;
+      background: var(--line);
+      box-shadow: 0 0 10px var(--line);
+    }
+
+    .ad[data-fx="dashboard"] .ad__row:nth-child(2) .tlm__fill { background: var(--signal); box-shadow: 0 0 10px var(--signal); }
+    .ad[data-fx="dashboard"] .ad__row:nth-child(3) .tlm__fill { background: #E8EDF2; box-shadow: 0 0 10px #E8EDF2; }
+
+    .tlm__desc {
+      margin-top: 14px;
+      font-size: 13px;
+      line-height: 1.55;
       color: var(--lo);
     }
 
@@ -486,7 +535,7 @@
         下面用同一份版型重複四次，每一次換一種 GSAP 效果，<b style="color:var(--hi)">捲到畫面內才開始播</b>。
       </p>
       <div class="legend">
-        <span>01 · 3D 翻入</span><span>02 · 景深推進</span><span>03 · 遮罩橫掃</span><span>04 · 太空艙 HUD</span>
+        <span>01 · 3D 翻入</span><span>02 · 景深推進</span><span>03 · 遮罩橫掃</span><span>04 · 太空艙遙測</span>
       </div>
     </header>
 
@@ -538,12 +587,12 @@
       },
 
       {
-        fx: "dashboard", name: "太空艙 HUD / 儀表板掃描",
-        title: "AI 導讀：登艙啟動，座艙儀表全面同步。",
+        fx: "dashboard", name: "太空艙遙測 / lock-on",
+        title: "AI 導讀：座艙系統上線，三組遙測即時鎖定。",
         rows: [
-          { text: "即時遙測同步更新，座艙資訊一覽無遺。", value: 92 },
-          { text: "全頻雷達掃描，異常訊號秒級鎖定。", value: 78 },
-          { text: "推進系統狀態監控，讀數即時跳動回饋。", value: 95 },
+          { code: "LFE / 生命維持", value: 98, unit: "%", text: "氧氣與艙壓即時回報，數值穩定鎖定。" },
+          { code: "PWR / 主推進", value: 87, unit: "%", text: "反應爐輸出爬升，推進準備就緒。" },
+          { code: "NAV / 導航", value: 99, unit: "%", text: "星圖校準完成，航線誤差趨近於零。" },
         ]
       },
     ];
@@ -557,34 +606,26 @@
 
       const rowsHtml = m.rows.map((row, ri) => {
         if (isDashboard) {
-          return `<p class="ad__row">
-            <span class="ad__gauge-wrap">
-              <svg class="ad__gauge" viewBox="0 0 36 36" width="38" height="38">
-                <circle class="ad__gauge-bg" cx="18" cy="18" r="15" />
-                <circle class="ad__gauge-fg" cx="18" cy="18" r="15" data-value="${row.value}" style="stroke-dasharray:94.2" />
-              </svg>
-              <span class="ad__gauge-val">0%</span>
-            </span>
-            <span class="ad__row-i">${row.text}</span>
-          </p>`;
+          return `<div class="ad__row">
+            <div class="tlm__head"><span>${row.code}</span><span class="tlm__dot"></span></div>
+            <div class="tlm__read"><span class="tlm__val" data-value="${row.value}">${row.value}</span><span class="tlm__unit">${row.unit}</span></div>
+            <div class="tlm__bar"><span class="tlm__fill" data-value="${row.value}" style="width:${row.value}%"></span></div>
+            <p class="tlm__desc">${row.text}</p>
+          </div>`;
         }
         return `<p class="ad__row"><span class="ad__row-i"><span class="ad__num">0${ri + 1}</span>${row}</span><span class="ad__line"></span></p>`;
       }).join("");
 
       const hudMarkup = isDashboard ? `
-        <div class="ad__hud-corner tl"></div>
-        <div class="ad__hud-corner tr"></div>
-        <div class="ad__hud-corner bl"></div>
-        <div class="ad__hud-corner br"></div>
-        <div class="ad__hud-scan"></div>` : "";
-
-      const ledsMarkup = isDashboard
-        ? `<span class="ad__hud-leds"><span class="ad__hud-led"></span><span class="ad__hud-led"></span><span class="ad__hud-led"></span></span>`
-        : "";
+        <div class="ad__hud tl"><i class="h"></i><i class="v"></i></div>
+        <div class="ad__hud tr"><i class="h"></i><i class="v"></i></div>
+        <div class="ad__hud bl"><i class="h"></i><i class="v"></i></div>
+        <div class="ad__hud br"><i class="h"></i><i class="v"></i></div>
+        <div class="ad__status"><span class="dot"></span>SYSTEMS ONLINE</div>` : "";
 
       stop.innerHTML = `
     <article class="ad" data-fx="${m.fx}">${hudMarkup}
-      <div class="ad__badge"><span class="no">MODULE ${String(i + 1).padStart(2, "0")}</span> · EFFECT / ${m.name}${ledsMarkup}</div>
+      <div class="ad__badge"><span class="no">MODULE ${String(i + 1).padStart(2, "0")}</span> · EFFECT / ${m.name}</div>
       <h2 class="ad__title"><span class="lead">${m.title}</span></h2>
       <div class="ad__rows">${rowsHtml}</div>
     </article>`;
@@ -647,47 +688,69 @@
           }, "-=0.3");
       },
 
-      // 04 · spaceship cockpit HUD — corners snap in like a power-on sequence,
-      //      title types on char by char, rows rise while their gauges sweep up.
-      //      a radar scanline and blinking status LEDs loop for as long as the page lives.
+      // 04 · spaceship telemetry console — a single power-on / lock-on sequence.
+      //      The HUD frame draws itself corner by corner, the status light comes
+      //      online, the headline types on, then each channel locks in: its bar
+      //      sweeps to the reading while the number counts up. After lock-on the
+      //      readings keep a faint live jitter — the one ambient detail, so the
+      //      console reads as actually receiving telemetry rather than a static card.
       dashboard(ad, title, rows) {
         const titleChars = new SplitText(title, { type: "chars" }).chars;
-        const gauges = ad.querySelectorAll(".ad__gauge-fg");
-        const gaugeVals = ad.querySelectorAll(".ad__gauge-val");
-        const corners = ad.querySelectorAll(".ad__hud-corner");
-        const leds = ad.querySelectorAll(".ad__hud-led");
-        const scan = ad.querySelector(".ad__hud-scan");
+        const arms = ad.querySelectorAll(".ad__hud i");
+        const status = ad.querySelector(".ad__status");
+        const statusDot = ad.querySelector(".ad__status .dot");
+        const vals = ad.querySelectorAll(".tlm__val");
+        const fills = ad.querySelectorAll(".tlm__fill");
+        const heads = ad.querySelectorAll(".tlm__head");
+        const reads = ad.querySelectorAll(".tlm__read");
+        const descs = ad.querySelectorAll(".tlm__desc");
 
+        // resting → off, so nothing flashes before the trigger fires
         gsap.set(ad, { autoAlpha: 0, y: 26 });
-        gsap.set(corners, { scale: 0, autoAlpha: 0 });
+        gsap.set(arms, {
+          scaleX: (i, t) => t.classList.contains("h") ? 0 : 1,
+          scaleY: (i, t) => t.classList.contains("v") ? 0 : 1
+        });
+        gsap.set(status, { autoAlpha: 0 });
         gsap.set(titleChars, { autoAlpha: 0 });
-        gsap.set(rows, { autoAlpha: 0, y: 16 });
+        gsap.set([heads, reads], { autoAlpha: 0, y: 8 });
+        gsap.set(descs, { autoAlpha: 0 });
+        gsap.set(fills, { scaleX: 0 });
+        vals.forEach(v => v.textContent = "0");
 
         const tl = gsap.timeline({ scrollTrigger: { trigger: ad, start: "top 75%", toggleActions: "play none none reverse" } });
 
+        // power on: card in, frame draws around the corners, status online, title types
         tl.to(ad, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" })
-          .to(corners, { scale: 1, autoAlpha: 1, duration: 0.45, stagger: 0.07, ease: "back.out(2.4)" }, "-=0.2")
-          .to(titleChars, { autoAlpha: 1, stagger: 0.02, duration: 0.01 }, "-=0.1")
-          .to(rows, { autoAlpha: 1, y: 0, stagger: 0.16, duration: 0.5, ease: "power2.out" }, "-=0.2");
+          .to(arms, { scaleX: 1, scaleY: 1, duration: 0.45, stagger: 0.035, ease: "power2.out" }, "-=0.25")
+          .to(status, { autoAlpha: 1, duration: 0.3 }, "-=0.15")
+          .to(titleChars, { autoAlpha: 1, stagger: 0.015, duration: 0.01 }, "-=0.1");
 
-        gauges.forEach((g, i) => {
-          const val = parseFloat(g.dataset.value);
-          const offset = 94.2 * (1 - val / 100);
+        // lock on, channel by channel: header + readout rise, bar sweeps, number counts
+        rows.forEach((r, i) => {
+          const target = parseFloat(vals[i].dataset.value);
           const counter = { v: 0 };
-          tl.to(g, { strokeDashoffset: offset, duration: 0.9, ease: "power2.out" }, i === 0 ? "-=0.1" : "<")
+          tl.to([heads[i], reads[i]], { autoAlpha: 1, y: 0, duration: 0.35, ease: "power2.out" }, i === 0 ? "-=0.05" : "-=0.15")
+            .to(fills[i], { scaleX: 1, duration: 0.7, ease: "power3.out" }, "<")
             .to(counter, {
-              v: val, duration: 0.9, ease: "power2.out",
-              onUpdate: () => { if (gaugeVals[i]) gaugeVals[i].textContent = Math.round(counter.v) + "%"; }
-            }, "<");
+              v: target, duration: 0.7, ease: "power3.out",
+              onUpdate: () => { vals[i].textContent = Math.round(counter.v); }
+            }, "<")
+            .to(descs[i], { autoAlpha: 1, duration: 0.4 }, "-=0.4");
         });
 
-        // ambient HUD loops — kick off once and keep running for the page's lifetime
-        ScrollTrigger.create({
-          trigger: ad, start: "top 85%", once: true,
-          onEnter: () => {
-            gsap.fromTo(scan, { top: "0%" }, { top: "100%", duration: 2.6, repeat: -1, ease: "sine.inOut" });
-            gsap.to(leds, { autoAlpha: 0.15, duration: 0.45, stagger: { each: 0.18, repeat: -1, yoyo: true } });
-          }
+        // signature: once locked on, readings breathe and the status light pulses
+        tl.add(() => {
+          vals.forEach((v) => {
+            const base = parseFloat(v.dataset.value);
+            const proxy = { v: base };
+            gsap.to(proxy, {
+              duration: 1.4, repeat: -1, repeatRefresh: true, ease: "sine.inOut",
+              v: () => gsap.utils.clamp(0, 100, base + gsap.utils.random(-2, 2, 1)),
+              onUpdate: () => { v.textContent = Math.round(proxy.v); }
+            });
+          });
+          gsap.to(statusDot, { autoAlpha: 0.25, duration: 0.7, repeat: -1, yoyo: true, ease: "sine.inOut" });
         });
       }
     };
