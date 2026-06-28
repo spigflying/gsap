@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NEUROSPHERE — 神經介面 · 單一外框科技模組</title>
   <meta name="description"
-    content="單一版型：一個科技感外框 + 四個標題文字框。外框做成 HUD 切角造型（仿參考截圖）：切角輪廓自我描繪、邊框流動光、兩條斜線艙口化為持續滾動的 SVG 進度條。GSAP 驅動。" />
+    content="單一版型：一個 HUD 切角外框 + 四個標題文字框。外框的填色與描邊用同一條 SVG 路徑，輪廓與面板邊緣一模一樣；動畫改為一格一格——每顆光點依序亮起再淡出，繞著外框呼吸。GSAP 驅動。" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -85,30 +85,24 @@
       border: 1px solid var(--hairline); border-radius: 999px; padding: 6px 13px;
     }
 
-    /* ---------- the single module — all tech lives on the outer FRAME ---------- */
+    /* ---------- single module — all tech lives on the outer FRAME ---------- */
     .ad-stop { min-height: 100vh; display: flex; align-items: center; padding: 60px 0 100px; }
 
     .ad {
       position: relative; width: 100%;
-      padding: clamp(40px, 6vw, 70px) clamp(34px, 5vw, 62px);
-      background:
-        linear-gradient(180deg, rgba(14, 24, 34, 0.55), rgba(7, 13, 19, 0.55));
-      /* angular clip so the panel fill follows the HUD silhouette */
-      clip-path: polygon(
-        3.4% 0, 96% 0, 100% 6.6%, 100% 28%, 97.8% 33%, 97.8% 39%, 100% 44%,
-        100% 92.5%, 96.4% 100%, 9% 100%, 0 82%, 0 18%);
-      box-shadow: inset 0 0 90px rgba(70, 236, 255, 0.04);
+      padding: clamp(44px, 6vw, 72px) clamp(46px, 5.5vw, 70px);
+      /* no CSS clip / no CSS bg: the panel fill AND the outline are the SAME
+         SVG path, so the drawn frame traces the silhouette exactly (一模一樣) */
     }
 
-    /* the HUD frame is one full-bleed SVG drawn over the panel */
-    .frame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
-    .frame .outline { fill: none; stroke: var(--edge); stroke-width: 2; opacity: .92; filter: drop-shadow(0 0 4px rgba(238, 243, 245, .35)); }
+    .frame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+    .frame .fill { filter: drop-shadow(0 28px 64px rgba(0, 0, 0, .55)); }
+    .frame .outline { fill: none; stroke: var(--edge); stroke-width: 2; opacity: .92; filter: drop-shadow(0 0 4px rgba(238, 243, 245, .3)); }
     .frame .bracket { fill: none; stroke: var(--edge); stroke-width: 3; stroke-linecap: square; opacity: .92; }
-    .frame .glow { fill: none; stroke: var(--cyan); stroke-width: 2.5; filter: drop-shadow(0 0 8px var(--cyan)); opacity: .95; }
     .frame .tick { stroke: var(--edge); stroke-width: 2; opacity: .5; }
     .frame .block { fill: var(--edge); opacity: .9; }
+    .frame .cell { fill: var(--cyan); filter: drop-shadow(0 0 5px var(--cyan)); }
 
-    /* dashed hatch bays → animated progress bars */
     .frame .bay-base { opacity: .5; }
     .frame .prog { transform-box: fill-box; transform-origin: left center; }
 
@@ -174,11 +168,11 @@
       <h1>一個版型，<br><em>外框</em>科技化。</h1>
       <p>
         全頁只留<b style="color:var(--hi)">一個外框</b>＋<b style="color:var(--hi)">四個標題文字框</b>。
-        外框比照參考截圖做成 HUD 切角造型：切角輪廓自我描繪、一道光沿邊框流動；
-        兩處斜線艙口化為<b style="color:var(--hi)">持續滾動的 SVG 進度條</b>。多餘的內部直角框線已移除——科技變化只做在外框上。
+        外框的填色與描邊用<b style="color:var(--hi)">同一條 SVG 路徑</b>，輪廓與面板邊緣一模一樣；
+        動畫改為<b style="color:var(--hi)">一格一格</b>——每顆光點依序亮起再淡出，繞著外框呼吸。
       </p>
       <div class="legend">
-        <span>切角輪廓</span><span>邊框流光</span><span>左上階梯支架</span>
+        <span>切角輪廓</span><span>光點呼吸</span><span>左上階梯支架</span>
         <span>斜線進度艙 ×2</span><span>四標題框</span>
       </div>
     </header>
@@ -186,9 +180,13 @@
     <!-- ============ 單一模組 ============ -->
     <section class="ad-stop">
       <article class="ad">
-        <!-- HUD frame, drawn in a fixed viewBox and stretched to the panel -->
+        <!-- HUD frame: ONE path drives both the panel fill and the outline -->
         <svg class="frame" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
           <defs>
+            <linearGradient id="panelFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#0E1822" stop-opacity="0.92" />
+              <stop offset="1" stop-color="#070D13" stop-opacity="0.94" />
+            </linearGradient>
             <pattern id="hatch" width="16" height="16" patternUnits="userSpaceOnUse">
               <path d="M0 16 L16 0" stroke="#EEF3F5" stroke-width="2.4" />
             </pattern>
@@ -197,39 +195,36 @@
             </pattern>
           </defs>
 
-          <!-- main chamfered outline (self-drawing) -->
+          <!-- the silhouette: fill + outline share the EXACT same path data -->
+          <path id="hud" class="fill" fill="url(#panelFill)" d="
+            M40 4 L960 4 L996 40 L996 150 L974 174 L974 202 L996 226 L996 480
+            L960 516 L40 516 L4 480 L4 40 Z" />
           <path class="outline" d="
-            M6 96 L6 40 L40 6 L960 6 L994 40 L994 150
-            L972 175 L972 205 L994 230 L994 480 L960 514
-            L96 514 Q6 514 6 424 Z" />
+            M40 4 L960 4 L996 40 L996 150 L974 174 L974 202 L996 226 L996 480
+            L960 516 L40 516 L4 480 L4 40 Z" />
 
           <!-- stepped bracket accent, top-left -->
-          <path class="bracket" d="M18 84 L18 30 L30 18 L96 18" />
-          <path class="bracket" d="M30 30 L30 30" />
+          <path class="bracket" d="M18 78 L18 30 L30 18 L96 18" />
 
-          <!-- traveling border light (duplicate of the outline) -->
-          <path class="glow" d="
-            M6 96 L6 40 L40 6 L960 6 L994 40 L994 150
-            L972 175 L972 205 L994 230 L994 480 L960 514
-            L96 514 Q6 514 6 424 Z" />
-
-          <!-- short edge ticks, top-left, like the reference -->
-          <line class="tick" x1="120" y1="6" x2="120" y2="18" />
-          <line class="tick" x1="150" y1="6" x2="150" y2="18" />
-          <line class="tick" x1="180" y1="6" x2="180" y2="18" />
+          <!-- short edge ticks, top-left -->
+          <line class="tick" x1="120" y1="4" x2="120" y2="16" />
+          <line class="tick" x1="150" y1="4" x2="150" y2="16" />
+          <line class="tick" x1="180" y1="4" x2="180" y2="16" />
 
           <!-- TOP-RIGHT hatch bay → progress bar -->
           <g>
-            <rect class="bay-base" x="636" y="8" width="300" height="14" fill="url(#hatch)" />
-            <rect class="prog" id="progTop" x="636" y="8" width="300" height="14" fill="url(#hatchHi)" />
+            <rect class="bay-base" x="650" y="6" width="286" height="12" fill="url(#hatch)" />
+            <rect class="prog" id="progTop" x="650" y="6" width="286" height="12" fill="url(#hatchHi)" />
           </g>
-
           <!-- BOTTOM-RIGHT hatch bay → progress bar + solid block -->
           <g>
-            <rect class="bay-base" x="556" y="498" width="278" height="14" fill="url(#hatch)" />
-            <rect class="prog" id="progBot" x="556" y="498" width="278" height="14" fill="url(#hatchHi)" />
-            <path class="block" d="M846 494 L952 494 L968 510 L846 510 Z" />
+            <rect class="bay-base" x="560" y="502" width="270" height="12" fill="url(#hatch)" />
+            <rect class="prog" id="progBot" x="560" y="502" width="270" height="12" fill="url(#hatchHi)" />
+            <path class="block" d="M842 500 L946 500 L962 514 L842 514 Z" />
           </g>
+
+          <!-- breathing light cells get injected here, evenly along #hud -->
+          <g class="cells"></g>
         </svg>
 
         <div class="ad__inner">
@@ -248,7 +243,7 @@
     <footer>
       <div class="big">一個外框，科技化。</div>
       <div class="metaf">
-        單一版型 · 外框 HUD 切角 + 斜線進度艙 · 科技動畫只在外框 · GSAP 驅動<br>
+        單一版型 · 外框填色與描邊同一條路徑 · 光點一格一格呼吸 · GSAP 驅動<br>
         <a href="ad-modules.html">← 廣告模組</a> &nbsp;·&nbsp;
         <a href="advanced.html">進階標本表 II</a> &nbsp;·&nbsp;
         <a href="index.html">標本表 I</a>
@@ -262,45 +257,51 @@
 
   <script>
     gsap.registerPlugin(ScrollTrigger);
-
     gsap.to("#topbar", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: 0.3 } });
-
-    const mm = gsap.matchMedia();
 
     /* march a diagonal-line pattern horizontally → endless scrolling hatch */
     function marchHatch(id, speed) {
       const pat = document.getElementById(id);
       if (!pat) return;
       const proxy = { v: 0 };
-      return gsap.to(proxy, {
-        v: 16, duration: speed, repeat: -1, ease: "none",
-        onUpdate() { pat.setAttribute("patternTransform", `translate(${proxy.v} 0)`); }
-      });
+      gsap.to(proxy, { v: 16, duration: speed, repeat: -1, ease: "none", onUpdate() { pat.setAttribute("patternTransform", `translate(${proxy.v} 0)`); } });
     }
+
+    const mm = gsap.matchMedia();
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       document.querySelectorAll(".ad").forEach(ad => {
         const dot = ad.querySelector(".ad__badge .dot");
+        const hud = ad.querySelector("#hud");
         const outline = ad.querySelector(".outline");
-        const glow = ad.querySelector(".glow");
-        const brackets = ad.querySelectorAll(".bracket");
+        const bracket = ad.querySelector(".bracket");
         const ticks = ad.querySelectorAll(".tick");
         const progs = ad.querySelectorAll(".prog");
         const block = ad.querySelector(".block");
+        const cellsG = ad.querySelector(".cells");
         const badge = ad.querySelector(".ad__badge");
         const title = ad.querySelector(".ad__title");
         const metas = ad.querySelectorAll(".ad__row .meta");
         const copies = ad.querySelectorAll(".ad__row .copy");
 
-        // outline + glow geometry
-        const L = outline.getTotalLength();
+        // self-draw geometry: stroke the silhouette (a <use> of #hud)
+        const L = hud.getTotalLength();
         gsap.set(outline, { strokeDasharray: L, strokeDashoffset: L });
-        const seg = Math.max(120, L * 0.12);
-        gsap.set(glow, { strokeDasharray: seg + " " + (L - seg), strokeDashoffset: 0, autoAlpha: 0 });
 
-        // resting states — layout never moves, only the frame & text reveal
-        gsap.set(brackets, { autoAlpha: 0 });
+        // generate evenly-spaced "cells" (每一顆) along the exact silhouette
+        const N = 48, cells = [];
+        for (let i = 0; i < N; i++) {
+          const p = hud.getPointAtLength((L * i) / N);
+          const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          c.setAttribute("cx", p.x.toFixed(1)); c.setAttribute("cy", p.y.toFixed(1));
+          c.setAttribute("r", "3.4"); c.setAttribute("class", "cell");
+          cellsG.appendChild(c); cells.push(c);
+        }
+
+        // resting states — layout never moves; frame + text reveal on enter
+        gsap.set(bracket, { autoAlpha: 0 });
         gsap.set(ticks, { autoAlpha: 0 });
+        gsap.set(cells, { opacity: 0 });
         gsap.set(progs, { scaleX: 0, autoAlpha: 0.95 });
         if (block) gsap.set(block, { autoAlpha: 0 });
         gsap.set([badge, title], { autoAlpha: 0, y: 12 });
@@ -311,9 +312,8 @@
           trigger: ad, start: "top 80%", once: true,
           onEnter: () => {
             gsap.timeline()
-              // FRAME tech: the chamfered outline self-draws
               .to(outline, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" })
-              .to(brackets, { autoAlpha: 1, duration: 0.4 }, "-=0.6")
+              .to(bracket, { autoAlpha: 1, duration: 0.4 }, "-=0.6")
               .to(ticks, { autoAlpha: 1, duration: 0.3, stagger: 0.06 }, "-=0.4")
               .to(block, { autoAlpha: 0.9, duration: 0.4 }, "-=0.3")
               // TEXT-ONLY reveal inside the four boxes (boxes stay put)
@@ -321,17 +321,17 @@
               .to(metas, { autoAlpha: 1, duration: 0.3, stagger: 0.08 }, "-=0.1")
               .to(copies, { clipPath: "inset(0 0% 0 0)", duration: 0.55, stagger: 0.1, ease: "power2.out" }, "-=0.15");
 
-            // ambient loops on the frame
-            gsap.fromTo(glow, { strokeDashoffset: 0, autoAlpha: 0.95 }, { strokeDashoffset: -L, duration: 7, repeat: -1, ease: "none" });
+            // 一格一格：each cell lights then fades, in sequence around the frame
+            // → a slow wave that yoyos = breathing
+            gsap.fromTo(cells, { opacity: 0.08 },
+              { opacity: 1, duration: 0.65, ease: "sine.inOut",
+                stagger: { each: 0.055, from: "start", repeat: -1, yoyo: true } });
+
             if (dot) gsap.to(dot, { autoAlpha: 0.3, duration: 0.8, repeat: -1, yoyo: true, ease: "sine.inOut" });
 
             // dashed bays → continuously scrolling progress bars
-            marchHatch("hatch", 0.9);
-            marchHatch("hatchHi", 0.9);
-            progs.forEach((p, i) => {
-              gsap.fromTo(p, { scaleX: 0 },
-                { scaleX: 1, duration: 2.6, repeat: -1, repeatDelay: 0.4, ease: "power1.inOut", delay: i * 0.6 });
-            });
+            marchHatch("hatch", 0.9); marchHatch("hatchHi", 0.9);
+            progs.forEach((p, i) => gsap.fromTo(p, { scaleX: 0 }, { scaleX: 1, duration: 2.6, repeat: -1, repeatDelay: 0.4, ease: "power1.inOut", delay: i * 0.6 }));
           }
         });
       });
@@ -339,7 +339,7 @@
 
     /* reduced motion: frame + text simply shown, no looping animation */
     mm.add("(prefers-reduced-motion: reduce)", () => {
-      gsap.set(".outline, .glow, .bracket, .tick, .block", { autoAlpha: 1, clearProps: "strokeDasharray,strokeDashoffset" });
+      gsap.set(".outline, .bracket, .tick, .block", { autoAlpha: 1, clearProps: "strokeDasharray,strokeDashoffset" });
       gsap.set(".prog", { scaleX: 1 });
     });
 
