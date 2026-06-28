@@ -88,6 +88,14 @@
     /* ---------- single module — all tech lives on the outer FRAME ---------- */
     .ad-stop { min-height: 100vh; display: flex; align-items: center; padding: 60px 0 100px; }
 
+    /* the white module sits on a full-width white band */
+    .ad-stop.section-light { position: relative; }
+    .ad-stop.section-light::before {
+      content: ""; position: absolute; top: 0; bottom: 0; left: 50%;
+      width: 100vw; transform: translateX(-50%); background: #fff; z-index: 0;
+    }
+    .ad-stop.section-light > .ad { z-index: 1; }
+
     .ad {
       position: relative; width: 100%;
       padding: clamp(44px, 6vw, 72px) clamp(46px, 5.5vw, 70px);
@@ -244,7 +252,7 @@
     </section>
 
     <!-- ============ 單一模組 · 白色版本 ============ -->
-    <section class="ad-stop">
+    <section class="ad-stop section-light">
       <article class="ad light">
         <svg class="frame" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
           <defs>
@@ -320,6 +328,30 @@
       return cells;
     }
 
+    /* Matrix-style decode: each char flickers through random kana / latin,
+       then locks to the correct character one by one, left to right */
+    const SCRAMBLE_KATA = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲ";
+    const SCRAMBLE_LAT = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&<>/*";
+    function rndGlyph(c) {
+      if (/\s/.test(c)) return c;
+      if (/[　-鿿＀-￯゠-ヿ]/.test(c)) return SCRAMBLE_KATA.charAt(Math.random() * SCRAMBLE_KATA.length | 0);
+      return SCRAMBLE_LAT.charAt(Math.random() * SCRAMBLE_LAT.length | 0);
+    }
+    function scrambleIn(el) {
+      const text = el.dataset.text || (el.dataset.text = el.textContent);
+      const chars = [...text], n = chars.length, st = { v: 0 };
+      gsap.to(st, {
+        v: n, duration: Math.min(1.6, 0.05 * n + 0.35), ease: "power1.inOut",
+        onStart() { gsap.set(el, { autoAlpha: 1 }); },
+        onUpdate() {
+          let out = "";
+          for (let i = 0; i < n; i++) out += (i < st.v) ? chars[i] : rndGlyph(chars[i]);
+          el.textContent = out;
+        },
+        onComplete() { el.textContent = text; }
+      });
+    }
+
     const mm = gsap.matchMedia();
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
@@ -332,8 +364,10 @@
         const block = ad.querySelector(".block");
         const badge = ad.querySelector(".ad__badge");
         const title = ad.querySelector(".ad__title");
+        const titleLead = ad.querySelector(".ad__title .lead");
         const metas = ad.querySelectorAll(".ad__row .meta");
         const copies = ad.querySelectorAll(".ad__row .copy");
+        const isLight = ad.classList.contains("light");
 
         // self-draw geometry: stroke the exact silhouette
         const L = hud.getTotalLength();
@@ -348,29 +382,41 @@
         gsap.set(ticks, { autoAlpha: 0 });
         gsap.set([...cellsTop, ...cellsBot], { opacity: 0.16 });
         if (block) gsap.set(block, { autoAlpha: 0 });
-        gsap.set([badge, title], { autoAlpha: 0, y: 12 });
+        gsap.set(badge, { autoAlpha: 0, y: 12 });
         gsap.set(metas, { autoAlpha: 0 });
-        gsap.set(copies, { clipPath: "inset(0 100% 0 0)" });
+        if (isLight) {
+          // the white module decodes its text Matrix-style → hide until then
+          gsap.set([titleLead, ...copies], { autoAlpha: 0 });
+        } else {
+          gsap.set(title, { autoAlpha: 0, y: 12 });
+          gsap.set(copies, { clipPath: "inset(0 100% 0 0)" });
+        }
 
         ScrollTrigger.create({
           trigger: ad, start: "top 80%", once: true,
           onEnter: () => {
-            gsap.timeline()
-              .to(outline, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" })
+            const tl = gsap.timeline();
+            tl.to(outline, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" })
               .to(bracket, { autoAlpha: 1, duration: 0.4 }, "-=0.6")
               .to(ticks, { autoAlpha: 1, duration: 0.3, stagger: 0.06 }, "-=0.4")
               .to(block, { autoAlpha: 0.9, duration: 0.4 }, "-=0.3")
-              // TEXT-ONLY reveal inside the four boxes (boxes stay put)
-              .to([badge, title], { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out" }, "-=0.3")
-              .to(metas, { autoAlpha: 1, duration: 0.3, stagger: 0.08 }, "-=0.1")
-              .to(copies, { clipPath: "inset(0 0% 0 0)", duration: 0.55, stagger: 0.1, ease: "power2.out" }, "-=0.15");
+              .to(badge, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, "-=0.3")
+              .to(metas, { autoAlpha: 1, duration: 0.3, stagger: 0.08 }, "-=0.1");
 
-            // runway lights / flowing data: each cell lights in sequence then off,
-            // one-directional chase that loops (no horizontal movement — cells are fixed)
-            // half the speed (each 0.08→0.16) and half the frequency (added repeatDelay)
+            if (isLight) {
+              // 駭客任務式解碼：每個字亂數跳動，第一個字先定下，再依序往後鎖定
+              tl.call(scrambleIn, [titleLead], "-=0.05")
+                .call(scrambleIn, [copies[0]], ">+0.25")
+                .call(scrambleIn, [copies[1]], ">+0.6")
+                .call(scrambleIn, [copies[2]], ">+0.6");
+            } else {
+              tl.to(title, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, "-=0.35")
+                .to(copies, { clipPath: "inset(0 0% 0 0)", duration: 0.55, stagger: 0.1, ease: "power2.out" }, "-=0.15");
+            }
+
+            // runway lights / flowing data (half speed, half frequency, cells fixed)
             gsap.to(cellsTop, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "start" } });
             gsap.to(cellsBot, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "end" } });
-
             if (dot) gsap.to(dot, { autoAlpha: 0.3, duration: 0.8, repeat: -1, yoyo: true, ease: "sine.inOut" });
           }
         });
