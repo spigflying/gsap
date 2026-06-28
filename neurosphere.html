@@ -65,7 +65,7 @@
     }
     .backlink:hover { color: var(--cyan); border-color: var(--cyan); }
 
-    .wrap { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
 
     /* ---------- hero ---------- */
     .intro { min-height: 66vh; display: flex; flex-direction: column; justify-content: center; }
@@ -121,8 +121,8 @@
     }
     .ad__title .lead { color: var(--cyan); text-shadow: 0 0 22px rgba(70, 236, 255, .25); }
 
-    /* four title boxes (2×2) — boxes never move, only their text reveals */
-    .ad__rows { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    /* three title boxes in a row — boxes never move, only their text reveals */
+    .ad__rows { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 
     .ad__row {
       position: relative; min-width: 0;
@@ -133,9 +133,8 @@
       padding: 16px 18px 18px;
     }
     .ad__row:nth-child(2) { border-top-color: var(--signal); }
-    .ad__row:nth-child(3) { border-top-color: var(--cyan); }
-    .ad__row:nth-child(4) { border-top-color: var(--hi); }
-    @media (max-width: 560px) { .ad__rows { grid-template-columns: 1fr; } }
+    .ad__row:nth-child(3) { border-top-color: var(--hi); }
+    @media (max-width: 760px) { .ad__rows { grid-template-columns: 1fr; } }
 
     .ad__row .meta {
       display: flex; align-items: center; gap: 8px; margin-bottom: 9px;
@@ -165,7 +164,7 @@
       <div class="kicker">Neurosphere · Single-Frame Module</div>
       <h1>一個版型，<br><em>外框</em>科技化。</h1>
       <p>
-        全頁只留<b style="color:var(--hi)">一個外框</b>＋<b style="color:var(--hi)">四個標題文字框</b>。
+        全頁只留<b style="color:var(--hi)">一個外框</b>＋<b style="color:var(--hi)">三個標題文字框</b>。
         外框的填色與描邊用<b style="color:var(--hi)">同一條 SVG 路徑</b>，輪廓與面板邊緣一模一樣；
         動畫改為<b style="color:var(--hi)">一格一格</b>——每顆光點依序亮起再淡出，繞著外框呼吸。
       </p>
@@ -212,12 +211,11 @@
 
         <div class="ad__inner">
           <div class="ad__badge"><span class="no">MODULE 01</span> · NEUROSPHERE / 登入入口 <span class="dot"></span></div>
-          <h2 class="ad__title"><span class="lead">AI 導讀：進入神經介面，光環、星座、登入、同步四步到位。</span></h2>
+          <h2 class="ad__title"><span class="lead">AI 導讀：進入神經介面，光環、星座、登入三步到位。</span></h2>
           <div class="ad__rows">
             <div class="ad__row"><div class="meta"><span class="sdot"></span>S-01 · RING</div><div class="copy">同心 HUD 光環自我描繪，開機瞬間完成定位校準。</div></div>
             <div class="ad__row"><div class="meta"><span class="sdot"></span>S-02 · LINK</div><div class="copy">背景星座節點一條條接通，織出完整神經網路。</div></div>
             <div class="ad__row"><div class="meta"><span class="sdot"></span>S-03 · KEY</div><div class="copy">掃描驗證通過後解鎖，正式進入神經介面層。</div></div>
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-04 · SYNC</div><div class="copy">全模組資料同步上線，狀態讀數即時回報。</div></div>
           </div>
         </div>
       </article>
@@ -310,8 +308,9 @@
 
             // runway lights / flowing data: each cell lights in sequence then off,
             // one-directional chase that loops (no horizontal movement — cells are fixed)
-            gsap.to(cellsTop, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 0.7, ease: "sine.inOut", stagger: { each: 0.08, from: "start", repeat: -1 } });
-            gsap.to(cellsBot, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 0.7, ease: "sine.inOut", stagger: { each: 0.08, from: "end", repeat: -1 } });
+            // half the speed (each 0.08→0.16) and half the frequency (added repeatDelay)
+            gsap.to(cellsTop, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "start" } });
+            gsap.to(cellsBot, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "end" } });
 
             if (dot) gsap.to(dot, { autoAlpha: 0.3, duration: 0.8, repeat: -1, yoyo: true, ease: "sine.inOut" });
           }
