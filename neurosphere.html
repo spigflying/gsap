@@ -101,10 +101,8 @@
     .frame .bracket { fill: none; stroke: var(--edge); stroke-width: 3; stroke-linecap: square; opacity: .92; }
     .frame .tick { stroke: var(--edge); stroke-width: 2; opacity: .5; }
     .frame .block { fill: var(--edge); opacity: .9; }
-    .frame .cell { fill: var(--cyan); filter: drop-shadow(0 0 5px var(--cyan)); }
-
-    .frame .bay-base { opacity: .5; }
-    .frame .prog { transform-box: fill-box; transform-origin: left center; }
+    /* two diagonal-slash bays: rows of hollow cells, lit like runway lights */
+    .frame .bay-cell { fill: none; stroke: var(--cyan); stroke-width: 1.6; filter: drop-shadow(0 0 4px var(--cyan)); }
 
     .ad__inner { position: relative; z-index: 3; }
 
@@ -187,12 +185,6 @@
               <stop offset="0" stop-color="#0E1822" stop-opacity="0.92" />
               <stop offset="1" stop-color="#070D13" stop-opacity="0.94" />
             </linearGradient>
-            <pattern id="hatch" width="16" height="16" patternUnits="userSpaceOnUse">
-              <path d="M0 16 L16 0" stroke="#EEF3F5" stroke-width="2.4" />
-            </pattern>
-            <pattern id="hatchHi" width="16" height="16" patternUnits="userSpaceOnUse">
-              <path d="M0 16 L16 0" stroke="#46ECFF" stroke-width="3" />
-            </pattern>
           </defs>
 
           <!-- the silhouette: fill + outline share the EXACT same path data -->
@@ -211,20 +203,11 @@
           <line class="tick" x1="150" y1="4" x2="150" y2="16" />
           <line class="tick" x1="180" y1="4" x2="180" y2="16" />
 
-          <!-- TOP-RIGHT hatch bay → progress bar -->
-          <g>
-            <rect class="bay-base" x="650" y="6" width="286" height="12" fill="url(#hatch)" />
-            <rect class="prog" id="progTop" x="650" y="6" width="286" height="12" fill="url(#hatchHi)" />
-          </g>
-          <!-- BOTTOM-RIGHT hatch bay → progress bar + solid block -->
-          <g>
-            <rect class="bay-base" x="560" y="502" width="270" height="12" fill="url(#hatch)" />
-            <rect class="prog" id="progBot" x="560" y="502" width="270" height="12" fill="url(#hatchHi)" />
-            <path class="block" d="M842 500 L946 500 L962 514 L842 514 Z" />
-          </g>
-
-          <!-- breathing light cells get injected here, evenly along #hud -->
-          <g class="cells"></g>
+          <!-- TOP-RIGHT diagonal-slash bay: hollow cells, runway-light chase -->
+          <g class="bay" id="bayTop" data-x="606" data-y="3" data-w="352" data-h="18" data-n="18"></g>
+          <!-- BOTTOM-RIGHT diagonal-slash bay + solid block -->
+          <g class="bay" id="bayBot" data-x="534" data-y="500" data-w="312" data-h="16" data-n="16"></g>
+          <path class="block" d="M858 498 L956 498 L972 516 L858 516 Z" />
         </svg>
 
         <div class="ad__inner">
@@ -259,12 +242,25 @@
     gsap.registerPlugin(ScrollTrigger);
     gsap.to("#topbar", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: 0.3 } });
 
-    /* march a diagonal-line pattern horizontally → endless scrolling hatch */
-    function marchHatch(id, speed) {
-      const pat = document.getElementById(id);
-      if (!pat) return;
-      const proxy = { v: 0 };
-      gsap.to(proxy, { v: 16, duration: speed, repeat: -1, ease: "none", onUpdate() { pat.setAttribute("patternTransform", `translate(${proxy.v} 0)`); } });
+    const SVGNS = "http://www.w3.org/2000/svg";
+
+    /* build a diagonal-slash bay: a fixed row of hollow cells (no movement) */
+    function buildBay(g) {
+      const x0 = +g.dataset.x, y0 = +g.dataset.y, w = +g.dataset.w, h = +g.dataset.h, n = +g.dataset.n;
+      const gap = 5, cw = (w - gap * (n - 1)) / n, skew = h * 0.55;
+      const cells = [];
+      for (let i = 0; i < n; i++) {
+        const x = x0 + i * (cw + gap);
+        const p = document.createElementNS(SVGNS, "path");
+        p.setAttribute("d",
+          "M" + (x + skew).toFixed(1) + " " + y0 +
+          " L" + (x + cw).toFixed(1) + " " + y0 +
+          " L" + (x + cw - skew).toFixed(1) + " " + (y0 + h) +
+          " L" + x.toFixed(1) + " " + (y0 + h) + " Z");
+        p.setAttribute("class", "bay-cell");
+        g.appendChild(p); cells.push(p);
+      }
+      return cells;
     }
 
     const mm = gsap.matchMedia();
@@ -276,33 +272,24 @@
         const outline = ad.querySelector(".outline");
         const bracket = ad.querySelector(".bracket");
         const ticks = ad.querySelectorAll(".tick");
-        const progs = ad.querySelectorAll(".prog");
         const block = ad.querySelector(".block");
-        const cellsG = ad.querySelector(".cells");
         const badge = ad.querySelector(".ad__badge");
         const title = ad.querySelector(".ad__title");
         const metas = ad.querySelectorAll(".ad__row .meta");
         const copies = ad.querySelectorAll(".ad__row .copy");
 
-        // self-draw geometry: stroke the silhouette (a <use> of #hud)
+        // self-draw geometry: stroke the exact silhouette
         const L = hud.getTotalLength();
         gsap.set(outline, { strokeDasharray: L, strokeDashoffset: L });
 
-        // generate evenly-spaced "cells" (每一顆) along the exact silhouette
-        const N = 48, cells = [];
-        for (let i = 0; i < N; i++) {
-          const p = hud.getPointAtLength((L * i) / N);
-          const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-          c.setAttribute("cx", p.x.toFixed(1)); c.setAttribute("cy", p.y.toFixed(1));
-          c.setAttribute("r", "3.4"); c.setAttribute("class", "cell");
-          cellsG.appendChild(c); cells.push(c);
-        }
+        // build the two fixed diagonal-slash bays
+        const cellsTop = buildBay(ad.querySelector("#bayTop"));
+        const cellsBot = buildBay(ad.querySelector("#bayBot"));
 
         // resting states — layout never moves; frame + text reveal on enter
         gsap.set(bracket, { autoAlpha: 0 });
         gsap.set(ticks, { autoAlpha: 0 });
-        gsap.set(cells, { opacity: 0 });
-        gsap.set(progs, { scaleX: 0, autoAlpha: 0.95 });
+        gsap.set([...cellsTop, ...cellsBot], { opacity: 0.16 });
         if (block) gsap.set(block, { autoAlpha: 0 });
         gsap.set([badge, title], { autoAlpha: 0, y: 12 });
         gsap.set(metas, { autoAlpha: 0 });
@@ -321,26 +308,22 @@
               .to(metas, { autoAlpha: 1, duration: 0.3, stagger: 0.08 }, "-=0.1")
               .to(copies, { clipPath: "inset(0 0% 0 0)", duration: 0.55, stagger: 0.1, ease: "power2.out" }, "-=0.15");
 
-            // 一格一格：each cell lights then fades, in sequence around the frame
-            // → a slow wave that yoyos = breathing
-            gsap.fromTo(cells, { opacity: 0.08 },
-              { opacity: 1, duration: 0.65, ease: "sine.inOut",
-                stagger: { each: 0.055, from: "start", repeat: -1, yoyo: true } });
+            // runway lights / flowing data: each cell lights in sequence then off,
+            // one-directional chase that loops (no horizontal movement — cells are fixed)
+            gsap.to(cellsTop, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 0.7, ease: "sine.inOut", stagger: { each: 0.08, from: "start", repeat: -1 } });
+            gsap.to(cellsBot, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 0.7, ease: "sine.inOut", stagger: { each: 0.08, from: "end", repeat: -1 } });
 
             if (dot) gsap.to(dot, { autoAlpha: 0.3, duration: 0.8, repeat: -1, yoyo: true, ease: "sine.inOut" });
-
-            // dashed bays → continuously scrolling progress bars
-            marchHatch("hatch", 0.9); marchHatch("hatchHi", 0.9);
-            progs.forEach((p, i) => gsap.fromTo(p, { scaleX: 0 }, { scaleX: 1, duration: 2.6, repeat: -1, repeatDelay: 0.4, ease: "power1.inOut", delay: i * 0.6 }));
           }
         });
       });
     });
 
-    /* reduced motion: frame + text simply shown, no looping animation */
+    /* reduced motion: frame, bays + text simply shown, no looping animation */
     mm.add("(prefers-reduced-motion: reduce)", () => {
       gsap.set(".outline, .bracket, .tick, .block", { autoAlpha: 1, clearProps: "strokeDasharray,strokeDashoffset" });
-      gsap.set(".prog", { scaleX: 1 });
+      document.querySelectorAll(".bay").forEach(buildBay);
+      gsap.set(".bay-cell", { opacity: 0.6 });
     });
 
     window.addEventListener("load", () => ScrollTrigger.refresh());
