@@ -176,6 +176,11 @@
     .ad.light .ad__row:nth-child(2) .sdot { background: var(--signal); box-shadow: 0 0 6px var(--signal); }
     .ad.light .ad__row:nth-child(3) .sdot { background: #0B141B; box-shadow: none; }
 
+    /* white module: narrower by ~1/3, centered; its bottom-left bay fills when lit */
+    .ad-stop.section-light { justify-content: center; }
+    .ad-stop.section-light > .ad { max-width: 840px; }
+    .ad.light .bay-fill .bay-cell { fill: #0094B3; fill-opacity: 0; }
+
     footer { padding: 80px 0 120px; text-align: center; color: var(--lo); }
     footer .big { font-family: var(--display); font-weight: 700; color: var(--hi); font-size: clamp(24px, 4vw, 40px); letter-spacing: -.02em; margin-bottom: 16px; }
     footer .metaf { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; }
@@ -272,7 +277,7 @@
           <line class="tick" x1="150" y1="4" x2="150" y2="16" />
           <line class="tick" x1="180" y1="4" x2="180" y2="16" />
           <g class="bay bay-top" data-x="606" data-y="3" data-w="352" data-h="18" data-n="18"></g>
-          <g class="bay bay-bot" data-x="534" data-y="500" data-w="312" data-h="16" data-n="16"></g>
+          <g class="bay bay-bot bay-fill" data-x="44" data-y="500" data-w="312" data-h="16" data-n="16"></g>
           <path class="block" d="M858 498 L956 498 L972 516 L858 516 Z" />
         </svg>
 
@@ -374,13 +379,17 @@
         gsap.set(outline, { strokeDasharray: L, strokeDashoffset: L });
 
         // build the two fixed diagonal-slash bays
+        const botBayEl = ad.querySelector(".bay-bot");
+        const botFill = botBayEl.classList.contains("bay-fill");
         const cellsTop = buildBay(ad.querySelector(".bay-top"));
-        const cellsBot = buildBay(ad.querySelector(".bay-bot"));
+        const cellsBot = buildBay(botBayEl);
 
         // resting states — layout never moves; frame + text reveal on enter
         gsap.set(bracket, { autoAlpha: 0 });
         gsap.set(ticks, { autoAlpha: 0 });
-        gsap.set([...cellsTop, ...cellsBot], { opacity: 0.16 });
+        gsap.set(cellsTop, { opacity: 0.16 });
+        // a fill bay keeps its hollow outline always on; only the fill toggles
+        gsap.set(cellsBot, botFill ? { opacity: 1, fillOpacity: 0 } : { opacity: 0.16 });
         if (block) gsap.set(block, { autoAlpha: 0 });
         gsap.set(badge, { autoAlpha: 0, y: 12 });
         gsap.set(metas, { autoAlpha: 0 });
@@ -416,7 +425,12 @@
 
             // runway lights / flowing data (half speed, half frequency, cells fixed)
             gsap.to(cellsTop, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "start" } });
-            gsap.to(cellsBot, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "end" } });
+            if (botFill) {
+              // fill bay: each cell fills solid when it lights, hollow otherwise
+              gsap.to(cellsBot, { keyframes: { fillOpacity: [0, 1, 0] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "start" } });
+            } else {
+              gsap.to(cellsBot, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "end" } });
+            }
             if (dot) gsap.to(dot, { autoAlpha: 0.3, duration: 0.8, repeat: -1, yoyo: true, ease: "sine.inOut" });
           }
         });
