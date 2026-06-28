@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NEUROSPHERE — 神經介面 · 六個科技廣告模組</title>
+  <title>NEUROSPHERE — 神經介面 · 單一外框科技模組</title>
   <meta name="description"
-    content="基本版型不變：模組外框 + AI 導讀 + 三則橫排 20 字文案。科技變化只做在外框上——四角 HUD 自繪、邊框流動光、狀態燈；三則文字框只做文字浮現。GSAP 驅動。" />
+    content="單一版型：一個科技感外框 + 四個標題文字框。外框做成 HUD 切角造型（仿參考截圖）：切角輪廓自我描繪、邊框流動光、兩條斜線艙口化為持續滾動的 SVG 進度條。GSAP 驅動。" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,11 +16,12 @@
 
   <style>
     :root {
-      --ink: #070B10;
-      --panel: #0E1822;
-      --panel-2: #0A121A;
-      --line: #00E0C6;
+      --ink: #050709;
+      --panel: #0C141C;
+      --panel-2: #070D13;
+      --edge: #EEF3F5;
       --cyan: #46ECFF;
+      --line: #00E0C6;
       --signal: #FF5C38;
       --hi: #E8F4F6;
       --lo: #7C8B95;
@@ -41,7 +42,7 @@
       overflow-x: hidden;
       background-image:
         radial-gradient(circle at 50% -10%, rgba(0, 224, 198, 0.10), transparent 50%),
-        radial-gradient(circle at 85% 110%, rgba(70, 236, 255, 0.06), transparent 45%);
+        radial-gradient(circle at 85% 115%, rgba(70, 236, 255, 0.06), transparent 45%);
     }
 
     ::selection { background: var(--cyan); color: #001014; }
@@ -60,70 +61,56 @@
       position: fixed; left: 18px; top: 16px; z-index: 80;
       font-family: var(--mono); font-size: 12px; letter-spacing: .12em;
       color: var(--lo); border: 1px solid var(--hairline); border-radius: 999px;
-      padding: 8px 16px; background: rgba(7, 11, 16, 0.7); backdrop-filter: blur(8px);
+      padding: 8px 16px; background: rgba(5, 7, 9, 0.7); backdrop-filter: blur(8px);
     }
     .backlink:hover { color: var(--cyan); border-color: var(--cyan); }
 
-    .rail {
-      position: fixed; right: 22px; top: 50%; transform: translateY(-50%);
-      z-index: 80; display: flex; flex-direction: column; gap: 14px;
-    }
-    .rail a { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--hairline); }
-    .rail a.on, .rail a:hover { border-color: var(--cyan); background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
-    @media (max-width: 720px) { .rail { display: none; } }
-
-    .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 0 24px; }
 
     /* ---------- hero ---------- */
-    .intro { min-height: 76vh; display: flex; flex-direction: column; justify-content: center; }
+    .intro { min-height: 66vh; display: flex; flex-direction: column; justify-content: center; }
     .intro .kicker {
       font-family: var(--mono); font-size: 12px; letter-spacing: .34em;
       text-transform: uppercase; color: var(--cyan); margin-bottom: 20px;
     }
     .intro h1 {
       font-family: var(--display); font-weight: 700;
-      font-size: clamp(40px, 8vw, 100px); line-height: .94; letter-spacing: -.03em;
+      font-size: clamp(40px, 8vw, 96px); line-height: .94; letter-spacing: -.03em;
     }
     .intro h1 em { font-style: normal; color: var(--cyan); text-shadow: 0 0 30px rgba(70, 236, 255, .4); }
-    .intro p { max-width: 48ch; color: var(--lo); font-size: clamp(15px, 1.5vw, 18px); margin-top: 24px; }
+    .intro p { max-width: 50ch; color: var(--lo); font-size: clamp(15px, 1.5vw, 18px); margin-top: 24px; }
     .intro .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
     .intro .legend span {
       font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--lo);
       border: 1px solid var(--hairline); border-radius: 999px; padding: 6px 13px;
     }
 
-    /* ---------- module: original ad layout; tech variation lives on the FRAME ---------- */
-    .ad-stop {
-      min-height: 100vh; display: flex; align-items: center;
-      padding: 70px 0;
-    }
+    /* ---------- the single module — all tech lives on the outer FRAME ---------- */
+    .ad-stop { min-height: 100vh; display: flex; align-items: center; padding: 60px 0 100px; }
 
     .ad {
       position: relative; width: 100%;
-      background: linear-gradient(180deg, var(--panel), var(--panel-2));
-      border: 1px solid var(--hairline); border-radius: 18px;
-      padding: clamp(26px, 4vw, 46px);
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 0 70px rgba(70, 236, 255, 0.03);
-      overflow: hidden;
+      padding: clamp(40px, 6vw, 70px) clamp(34px, 5vw, 62px);
+      background:
+        linear-gradient(180deg, rgba(14, 24, 34, 0.55), rgba(7, 13, 19, 0.55));
+      /* angular clip so the panel fill follows the HUD silhouette */
+      clip-path: polygon(
+        3.4% 0, 96% 0, 100% 6.6%, 100% 28%, 97.8% 33%, 97.8% 39%, 100% 44%,
+        100% 92.5%, 96.4% 100%, 9% 100%, 0 82%, 0 18%);
+      box-shadow: inset 0 0 90px rgba(70, 236, 255, 0.04);
     }
 
-    /* tech on the frame #1 — a light that travels the border outline */
+    /* the HUD frame is one full-bleed SVG drawn over the panel */
     .frame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
-    .frame .frame-rect {
-      fill: none; stroke: var(--cyan); stroke-width: 2;
-      filter: drop-shadow(0 0 6px var(--cyan)); opacity: .9;
-    }
+    .frame .outline { fill: none; stroke: var(--edge); stroke-width: 2; opacity: .92; filter: drop-shadow(0 0 4px rgba(238, 243, 245, .35)); }
+    .frame .bracket { fill: none; stroke: var(--edge); stroke-width: 3; stroke-linecap: square; opacity: .92; }
+    .frame .glow { fill: none; stroke: var(--cyan); stroke-width: 2.5; filter: drop-shadow(0 0 8px var(--cyan)); opacity: .95; }
+    .frame .tick { stroke: var(--edge); stroke-width: 2; opacity: .5; }
+    .frame .block { fill: var(--edge); opacity: .9; }
 
-    /* tech on the frame #2 — four self-drawing HUD corner brackets */
-    .hud { position: absolute; width: 26px; height: 26px; pointer-events: none; z-index: 2; }
-    .hud i { position: absolute; background: var(--line); box-shadow: 0 0 7px rgba(0, 224, 198, .55); }
-    .hud .h { height: 2px; width: 100%; }
-    .hud .v { width: 2px; height: 100%; }
-    .hud::after { content: ""; position: absolute; width: 4px; height: 4px; background: var(--signal); box-shadow: 0 0 7px var(--signal); }
-    .hud.tl { left: 14px; top: 14px; } .hud.tl .h { left: 0; top: 0; transform-origin: left; } .hud.tl .v { left: 0; top: 0; transform-origin: top; } .hud.tl::after { left: -1px; top: -1px; }
-    .hud.tr { right: 14px; top: 14px; } .hud.tr .h { right: 0; top: 0; transform-origin: right; } .hud.tr .v { right: 0; top: 0; transform-origin: top; } .hud.tr::after { right: -1px; top: -1px; }
-    .hud.bl { left: 14px; bottom: 14px; } .hud.bl .h { left: 0; bottom: 0; transform-origin: left; } .hud.bl .v { left: 0; bottom: 0; transform-origin: bottom; } .hud.bl::after { left: -1px; bottom: -1px; }
-    .hud.br { right: 14px; bottom: 14px; } .hud.br .h { right: 0; bottom: 0; transform-origin: right; } .hud.br .v { right: 0; bottom: 0; transform-origin: bottom; } .hud.br::after { right: -1px; bottom: -1px; }
+    /* dashed hatch bays → animated progress bars */
+    .frame .bay-base { opacity: .5; }
+    .frame .prog { transform-box: fill-box; transform-origin: left center; }
 
     .ad__inner { position: relative; z-index: 3; }
 
@@ -133,23 +120,20 @@
       text-transform: uppercase; color: var(--signal); margin-bottom: 16px;
     }
     .ad__badge .no { color: var(--lo); }
-    .ad__badge .dot {
-      width: 7px; height: 7px; border-radius: 50%; margin-left: 4px;
-      background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
-    }
+    .ad__badge .dot { width: 7px; height: 7px; border-radius: 50%; margin-left: 4px; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
 
     .ad__title {
       font-family: var(--tc); font-weight: 700;
       font-size: clamp(21px, 2.9vw, 32px); line-height: 1.35; letter-spacing: -.01em;
-      margin-bottom: 26px; max-width: 30ch;
+      margin-bottom: 30px; max-width: 32ch;
     }
     .ad__title .lead { color: var(--cyan); text-shadow: 0 0 22px rgba(70, 236, 255, .25); }
 
-    /* base template: three horizontal ~20-char copy boxes (unchanged layout) */
-    .ad__rows { display: flex; flex-direction: row; gap: 14px; }
+    /* four title boxes (2×2) — boxes never move, only their text reveals */
+    .ad__rows { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 
     .ad__row {
-      flex: 1 1 0; min-width: 0; position: relative;
+      position: relative; min-width: 0;
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--hairline);
       border-top: 3px solid var(--line);
@@ -157,8 +141,9 @@
       padding: 16px 18px 18px;
     }
     .ad__row:nth-child(2) { border-top-color: var(--signal); }
-    .ad__row:nth-child(3) { border-top-color: var(--hi); }
-    @media (max-width: 720px) { .ad__rows { flex-direction: column; } }
+    .ad__row:nth-child(3) { border-top-color: var(--cyan); }
+    .ad__row:nth-child(4) { border-top-color: var(--hi); }
+    @media (max-width: 560px) { .ad__rows { grid-template-columns: 1fr; } }
 
     .ad__row .meta {
       display: flex; align-items: center; gap: 8px; margin-bottom: 9px;
@@ -166,14 +151,12 @@
     }
     .ad__row .sdot { width: 6px; height: 6px; border-radius: 50%; background: var(--line); box-shadow: 0 0 6px var(--line); }
     .ad__row:nth-child(2) .sdot { background: var(--signal); box-shadow: 0 0 6px var(--signal); }
-    .ad__row:nth-child(3) .sdot { background: var(--hi); box-shadow: 0 0 6px var(--hi); }
+    .ad__row:nth-child(3) .sdot { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+    .ad__row:nth-child(4) .sdot { background: var(--hi); box-shadow: 0 0 6px var(--hi); }
     .ad__row .copy { font-size: clamp(14px, 1.5vw, 16px); line-height: 1.6; color: var(--hi); }
 
-    footer { padding: 90px 0 120px; text-align: center; color: var(--lo); }
-    footer .big {
-      font-family: var(--display); font-weight: 700; color: var(--hi);
-      font-size: clamp(24px, 4vw, 40px); letter-spacing: -.02em; margin-bottom: 16px;
-    }
+    footer { padding: 80px 0 120px; text-align: center; color: var(--lo); }
+    footer .big { font-family: var(--display); font-weight: 700; color: var(--hi); font-size: clamp(24px, 4vw, 40px); letter-spacing: -.02em; margin-bottom: 16px; }
     footer .metaf { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; }
 
     a:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
@@ -184,155 +167,88 @@
   <div class="topbar"><i id="topbar"></i></div>
   <a class="backlink" href="ad-modules.html">← 廣告模組</a>
 
-  <nav class="rail" aria-label="screens">
-    <a href="#s1" title="登入入口"></a>
-    <a href="#s2" title="神經活動"></a>
-    <a href="#s3" title="天氣洞察"></a>
-    <a href="#s4" title="腦波掃描"></a>
-    <a href="#s5" title="個人檔案"></a>
-    <a href="#s6" title="智慧家庭"></a>
-  </nav>
-
   <div class="wrap">
 
     <header class="intro">
-      <div class="kicker">Neurosphere · Ad Module Lab</div>
-      <h1>不動版型，<br><em>外框</em>科技化。</h1>
+      <div class="kicker">Neurosphere · Single-Frame Module</div>
+      <h1>一個版型，<br><em>外框</em>科技化。</h1>
       <p>
-        基本版型維持不變——外框、一行 AI 導讀、三則橫排各約 20 字文案。
-        <b style="color:var(--hi)">科技變化只做在外框上</b>：四角 HUD 自我描繪、一道光沿著邊框流動、狀態燈呼吸；
-        三則文字框本身不動,只做文字浮現。
+        全頁只留<b style="color:var(--hi)">一個外框</b>＋<b style="color:var(--hi)">四個標題文字框</b>。
+        外框比照參考截圖做成 HUD 切角造型：切角輪廓自我描繪、一道光沿邊框流動；
+        兩處斜線艙口化為<b style="color:var(--hi)">持續滾動的 SVG 進度條</b>。多餘的內部直角框線已移除——科技變化只做在外框上。
       </p>
       <div class="legend">
-        <span>01 · 登入入口</span><span>02 · 神經活動</span><span>03 · 天氣洞察</span>
-        <span>04 · 腦波掃描</span><span>05 · 個人檔案</span><span>06 · 智慧家庭</span>
+        <span>切角輪廓</span><span>邊框流光</span><span>左上階梯支架</span>
+        <span>斜線進度艙 ×2</span><span>四標題框</span>
       </div>
     </header>
 
-    <!-- ============ 01 ============ -->
-    <section class="ad-stop" id="s1">
+    <!-- ============ 單一模組 ============ -->
+    <section class="ad-stop">
       <article class="ad">
-        <svg class="frame" preserveAspectRatio="none"><rect class="frame-rect" rx="18" /></svg>
-        <div class="hud tl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud tr"><i class="h"></i><i class="v"></i></div>
-        <div class="hud bl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud br"><i class="h"></i><i class="v"></i></div>
+        <!-- HUD frame, drawn in a fixed viewBox and stretched to the panel -->
+        <svg class="frame" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <pattern id="hatch" width="16" height="16" patternUnits="userSpaceOnUse">
+              <path d="M0 16 L16 0" stroke="#EEF3F5" stroke-width="2.4" />
+            </pattern>
+            <pattern id="hatchHi" width="16" height="16" patternUnits="userSpaceOnUse">
+              <path d="M0 16 L16 0" stroke="#46ECFF" stroke-width="3" />
+            </pattern>
+          </defs>
+
+          <!-- main chamfered outline (self-drawing) -->
+          <path class="outline" d="
+            M6 96 L6 40 L40 6 L960 6 L994 40 L994 150
+            L972 175 L972 205 L994 230 L994 480 L960 514
+            L96 514 Q6 514 6 424 Z" />
+
+          <!-- stepped bracket accent, top-left -->
+          <path class="bracket" d="M18 84 L18 30 L30 18 L96 18" />
+          <path class="bracket" d="M30 30 L30 30" />
+
+          <!-- traveling border light (duplicate of the outline) -->
+          <path class="glow" d="
+            M6 96 L6 40 L40 6 L960 6 L994 40 L994 150
+            L972 175 L972 205 L994 230 L994 480 L960 514
+            L96 514 Q6 514 6 424 Z" />
+
+          <!-- short edge ticks, top-left, like the reference -->
+          <line class="tick" x1="120" y1="6" x2="120" y2="18" />
+          <line class="tick" x1="150" y1="6" x2="150" y2="18" />
+          <line class="tick" x1="180" y1="6" x2="180" y2="18" />
+
+          <!-- TOP-RIGHT hatch bay → progress bar -->
+          <g>
+            <rect class="bay-base" x="636" y="8" width="300" height="14" fill="url(#hatch)" />
+            <rect class="prog" id="progTop" x="636" y="8" width="300" height="14" fill="url(#hatchHi)" />
+          </g>
+
+          <!-- BOTTOM-RIGHT hatch bay → progress bar + solid block -->
+          <g>
+            <rect class="bay-base" x="556" y="498" width="278" height="14" fill="url(#hatch)" />
+            <rect class="prog" id="progBot" x="556" y="498" width="278" height="14" fill="url(#hatchHi)" />
+            <path class="block" d="M846 494 L952 494 L968 510 L846 510 Z" />
+          </g>
+        </svg>
+
         <div class="ad__inner">
           <div class="ad__badge"><span class="no">MODULE 01</span> · NEUROSPHERE / 登入入口 <span class="dot"></span></div>
-          <h2 class="ad__title"><span class="lead">AI 導讀：進入神經介面，光環、星座、登入三步驟一氣呵成。</span></h2>
+          <h2 class="ad__title"><span class="lead">AI 導讀：進入神經介面，光環、星座、登入、同步四步到位。</span></h2>
           <div class="ad__rows">
             <div class="ad__row"><div class="meta"><span class="sdot"></span>S-01 · RING</div><div class="copy">同心 HUD 光環自我描繪，開機瞬間完成定位校準。</div></div>
             <div class="ad__row"><div class="meta"><span class="sdot"></span>S-02 · LINK</div><div class="copy">背景星座節點一條條接通，織出完整神經網路。</div></div>
             <div class="ad__row"><div class="meta"><span class="sdot"></span>S-03 · KEY</div><div class="copy">掃描驗證通過後解鎖，正式進入神經介面層。</div></div>
-          </div>
-        </div>
-      </article>
-    </section>
-
-    <!-- ============ 02 ============ -->
-    <section class="ad-stop" id="s2">
-      <article class="ad">
-        <svg class="frame" preserveAspectRatio="none"><rect class="frame-rect" rx="18" /></svg>
-        <div class="hud tl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud tr"><i class="h"></i><i class="v"></i></div>
-        <div class="hud bl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud br"><i class="h"></i><i class="v"></i></div>
-        <div class="ad__inner">
-          <div class="ad__badge"><span class="no">MODULE 02</span> · NEUROSPHERE / 神經活動 <span class="dot"></span></div>
-          <h2 class="ad__title"><span class="lead">AI 導讀：聲波、神經折線、效能三組讀數，即時同台。</span></h2>
-          <div class="ad__rows">
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-01 · VOICE</div><div class="copy">語音指令即時收音，聲波隨腦波同步跳動回饋。</div></div>
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-02 · WAVE</div><div class="copy">神經折線圖即時描繪，完成後持續向左滾動更新。</div></div>
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-03 · PERF</div><div class="copy">效能長條由零拔起，AI 分析讀數累加至 84%。</div></div>
-          </div>
-        </div>
-      </article>
-    </section>
-
-    <!-- ============ 03 ============ -->
-    <section class="ad-stop" id="s3">
-      <article class="ad">
-        <svg class="frame" preserveAspectRatio="none"><rect class="frame-rect" rx="18" /></svg>
-        <div class="hud tl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud tr"><i class="h"></i><i class="v"></i></div>
-        <div class="hud bl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud br"><i class="h"></i><i class="v"></i></div>
-        <div class="ad__inner">
-          <div class="ad__badge"><span class="no">MODULE 03</span> · NEUROSPHERE / 天氣洞察 <span class="dot"></span></div>
-          <h2 class="ad__title"><span class="lead">AI 導讀：雷雨雲、閃電、時間洞察，把環境讀成三則天氣。</span></h2>
-          <div class="ad__rows">
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-01 · CLOUD</div><div class="copy">雷雨雲緩緩飄移，雨絲不間斷落下即時回報降雨。</div></div>
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-02 · BOLT</div><div class="copy">閃電一筆描繪成形再爆閃，提前發出雷擊預警。</div></div>
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-03 · TIME</div><div class="copy">時間軸持續更新，標記專注尖峰與雨歇時段。</div></div>
-          </div>
-        </div>
-      </article>
-    </section>
-
-    <!-- ============ 04 ============ -->
-    <section class="ad-stop" id="s4">
-      <article class="ad">
-        <svg class="frame" preserveAspectRatio="none"><rect class="frame-rect" rx="18" /></svg>
-        <div class="hud tl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud tr"><i class="h"></i><i class="v"></i></div>
-        <div class="hud bl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud br"><i class="h"></i><i class="v"></i></div>
-        <div class="ad__inner">
-          <div class="ad__badge"><span class="no">MODULE 04</span> · NEUROSPHERE / 腦波掃描 <span class="dot"></span></div>
-          <h2 class="ad__title"><span class="lead">AI 導讀：輪廓自繪、節點脈動、突觸奔走，三步重建神經網路。</span></h2>
-          <div class="ad__rows">
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-01 · DRAW</div><div class="copy">線框大腦沿著輪廓逐筆描繪，即時成形重建。</div></div>
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-02 · NODE</div><div class="copy">神經節點依序亮起並持續脈動，標記活躍區。</div></div>
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-03 · LINK</div><div class="copy">訊號沿突觸路徑來回奔走，全腦連線達 100%。</div></div>
-          </div>
-        </div>
-      </article>
-    </section>
-
-    <!-- ============ 05 ============ -->
-    <section class="ad-stop" id="s5">
-      <article class="ad">
-        <svg class="frame" preserveAspectRatio="none"><rect class="frame-rect" rx="18" /></svg>
-        <div class="hud tl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud tr"><i class="h"></i><i class="v"></i></div>
-        <div class="hud bl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud br"><i class="h"></i><i class="v"></i></div>
-        <div class="ad__inner">
-          <div class="ad__badge"><span class="no">MODULE 05</span> · NEUROSPHERE / 個人檔案 <span class="dot"></span></div>
-          <h2 class="ad__title"><span class="lead">AI 導讀：頭像環、健康指標、偏好開關，設定頁也是儀表。</span></h2>
-          <div class="ad__rows">
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-01 · ID</div><div class="copy">分段身分環旋轉校準，鎖定專屬 Neural ID。</div></div>
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-02 · WELL</div><div class="copy">神經健康長條呼吸般起伏，全天候即時監測。</div></div>
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-03 · PREF</div><div class="copy">偏好開關逐一切換上線，設定瞬間同步生效。</div></div>
-          </div>
-        </div>
-      </article>
-    </section>
-
-    <!-- ============ 06 ============ -->
-    <section class="ad-stop" id="s6">
-      <article class="ad">
-        <svg class="frame" preserveAspectRatio="none"><rect class="frame-rect" rx="18" /></svg>
-        <div class="hud tl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud tr"><i class="h"></i><i class="v"></i></div>
-        <div class="hud bl"><i class="h"></i><i class="v"></i></div>
-        <div class="hud br"><i class="h"></i><i class="v"></i></div>
-        <div class="ad__inner">
-          <div class="ad__badge"><span class="no">MODULE 06</span> · NEUROSPHERE / 智慧家庭 <span class="dot"></span></div>
-          <h2 class="ad__title"><span class="lead">AI 導讀：房間、場景、安防三則，一眼掌控整個空間。</span></h2>
-          <div class="ad__rows">
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-01 · ROOM</div><div class="copy">客廳臥室書房依序點亮，房間狀態一覽無遺。</div></div>
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-02 · SCENE</div><div class="copy">場景預設環各自填充到位，一鍵切換氛圍。</div></div>
-            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-03 · GUARD</div><div class="copy">全屋安防待命守護，偵測異常即時鎖定回報。</div></div>
+            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-04 · SYNC</div><div class="copy">全模組資料同步上線，狀態讀數即時回報。</div></div>
           </div>
         </div>
       </article>
     </section>
 
     <footer>
-      <div class="big">不動版型，外框科技化。</div>
+      <div class="big">一個外框，科技化。</div>
       <div class="metaf">
-        外框 + 三則 20 字文案維持原格式 · 科技動畫只在外框 · GSAP 驅動<br>
+        單一版型 · 外框 HUD 切角 + 斜線進度艙 · 科技動畫只在外框 · GSAP 驅動<br>
         <a href="ad-modules.html">← 廣告模組</a> &nbsp;·&nbsp;
         <a href="advanced.html">進階標本表 II</a> &nbsp;·&nbsp;
         <a href="index.html">標本表 I</a>
@@ -349,83 +265,86 @@
 
     gsap.to("#topbar", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: 0.3 } });
 
-    document.querySelectorAll(".ad-stop").forEach((sec, i) => {
-      const dots = document.querySelectorAll(".rail a");
-      ScrollTrigger.create({
-        trigger: sec, start: "top center", end: "bottom center",
-        onToggle: (self) => { if (self.isActive && dots[i]) { dots.forEach(d => d.classList.remove("on")); dots[i].classList.add("on"); } }
-      });
-    });
-
-    /* size the border-trace rect to the card's pixel box (no distortion) */
-    function sizeFrame(ad) {
-      const w = ad.offsetWidth, h = ad.offsetHeight;
-      const svg = ad.querySelector(".frame");
-      const rect = ad.querySelector(".frame-rect");
-      svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-      rect.setAttribute("x", 1); rect.setAttribute("y", 1);
-      rect.setAttribute("width", w - 2); rect.setAttribute("height", h - 2);
-      const L = rect.getTotalLength();
-      const seg = Math.max(60, L * 0.07);
-      rect.dataset.len = L; rect.dataset.seg = seg;
-      gsap.set(rect, { strokeDasharray: seg + " " + (L - seg) });
-      return L;
-    }
-
     const mm = gsap.matchMedia();
+
+    /* march a diagonal-line pattern horizontally → endless scrolling hatch */
+    function marchHatch(id, speed) {
+      const pat = document.getElementById(id);
+      if (!pat) return;
+      const proxy = { v: 0 };
+      return gsap.to(proxy, {
+        v: 16, duration: speed, repeat: -1, ease: "none",
+        onUpdate() { pat.setAttribute("patternTransform", `translate(${proxy.v} 0)`); }
+      });
+    }
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       document.querySelectorAll(".ad").forEach(ad => {
-        const arms = ad.querySelectorAll(".hud i");
         const dot = ad.querySelector(".ad__badge .dot");
-        const rect = ad.querySelector(".frame-rect");
+        const outline = ad.querySelector(".outline");
+        const glow = ad.querySelector(".glow");
+        const brackets = ad.querySelectorAll(".bracket");
+        const ticks = ad.querySelectorAll(".tick");
+        const progs = ad.querySelectorAll(".prog");
+        const block = ad.querySelector(".block");
         const badge = ad.querySelector(".ad__badge");
         const title = ad.querySelector(".ad__title");
         const metas = ad.querySelectorAll(".ad__row .meta");
         const copies = ad.querySelectorAll(".ad__row .copy");
 
-        // resting states (frame off; text hidden) — layout itself never moves
-        gsap.set(arms, { scaleX: (i, t) => t.classList.contains("h") ? 0 : 1, scaleY: (i, t) => t.classList.contains("v") ? 0 : 1 });
-        gsap.set(rect, { autoAlpha: 0 });
+        // outline + glow geometry
+        const L = outline.getTotalLength();
+        gsap.set(outline, { strokeDasharray: L, strokeDashoffset: L });
+        const seg = Math.max(120, L * 0.12);
+        gsap.set(glow, { strokeDasharray: seg + " " + (L - seg), strokeDashoffset: 0, autoAlpha: 0 });
+
+        // resting states — layout never moves, only the frame & text reveal
+        gsap.set(brackets, { autoAlpha: 0 });
+        gsap.set(ticks, { autoAlpha: 0 });
+        gsap.set(progs, { scaleX: 0, autoAlpha: 0.95 });
+        if (block) gsap.set(block, { autoAlpha: 0 });
         gsap.set([badge, title], { autoAlpha: 0, y: 12 });
         gsap.set(metas, { autoAlpha: 0 });
         gsap.set(copies, { clipPath: "inset(0 100% 0 0)" });
 
         ScrollTrigger.create({
-          trigger: ad, start: "top 78%", once: true,
+          trigger: ad, start: "top 80%", once: true,
           onEnter: () => {
-            const L = sizeFrame(ad);
-            // FRAME tech: corners draw in, then the border light starts travelling
             gsap.timeline()
-              .to(arms, { scaleX: 1, scaleY: 1, duration: 0.5, stagger: 0.04, ease: "power2.out" })
-              .to(rect, { autoAlpha: 0.9, duration: 0.4 }, "-=0.2")
-              // TEXT-ONLY reveal inside the three boxes (boxes themselves stay put)
+              // FRAME tech: the chamfered outline self-draws
+              .to(outline, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" })
+              .to(brackets, { autoAlpha: 1, duration: 0.4 }, "-=0.6")
+              .to(ticks, { autoAlpha: 1, duration: 0.3, stagger: 0.06 }, "-=0.4")
+              .to(block, { autoAlpha: 0.9, duration: 0.4 }, "-=0.3")
+              // TEXT-ONLY reveal inside the four boxes (boxes stay put)
               .to([badge, title], { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out" }, "-=0.3")
-              .to(metas, { autoAlpha: 1, duration: 0.3, stagger: 0.1 }, "-=0.1")
-              .to(copies, { clipPath: "inset(0 0% 0 0)", duration: 0.6, stagger: 0.14, ease: "power2.out" }, "-=0.2");
+              .to(metas, { autoAlpha: 1, duration: 0.3, stagger: 0.08 }, "-=0.1")
+              .to(copies, { clipPath: "inset(0 0% 0 0)", duration: 0.55, stagger: 0.1, ease: "power2.out" }, "-=0.15");
 
-            // ambient on the frame: light runs the border, status dot breathes
-            gsap.fromTo(rect, { strokeDashoffset: 0 }, { strokeDashoffset: -L, duration: 6, repeat: -1, ease: "none" });
+            // ambient loops on the frame
+            gsap.fromTo(glow, { strokeDashoffset: 0, autoAlpha: 0.95 }, { strokeDashoffset: -L, duration: 7, repeat: -1, ease: "none" });
             if (dot) gsap.to(dot, { autoAlpha: 0.3, duration: 0.8, repeat: -1, yoyo: true, ease: "sine.inOut" });
+
+            // dashed bays → continuously scrolling progress bars
+            marchHatch("hatch", 0.9);
+            marchHatch("hatchHi", 0.9);
+            progs.forEach((p, i) => {
+              gsap.fromTo(p, { scaleX: 0 },
+                { scaleX: 1, duration: 2.6, repeat: -1, repeatDelay: 0.4, ease: "power1.inOut", delay: i * 0.6 });
+            });
           }
         });
-      });
-
-      // keep the border-trace matched to size on resize
-      let rt;
-      window.addEventListener("resize", () => {
-        clearTimeout(rt);
-        rt = setTimeout(() => document.querySelectorAll(".ad").forEach(ad => { if (ad.querySelector(".frame").getAttribute("viewBox")) sizeFrame(ad); }), 200);
       });
     });
 
     /* reduced motion: frame + text simply shown, no looping animation */
     mm.add("(prefers-reduced-motion: reduce)", () => {
-      document.querySelectorAll(".ad").forEach(ad => { const L = sizeFrame(ad); gsap.set(ad.querySelector(".frame-rect"), { strokeDasharray: "none", opacity: 0.5 }); });
+      gsap.set(".outline, .glow, .bracket, .tick, .block", { autoAlpha: 1, clearProps: "strokeDasharray,strokeDashoffset" });
+      gsap.set(".prog", { scaleX: 1 });
     });
 
-    document.fonts.ready.then(() => ScrollTrigger.refresh());
     window.addEventListener("load", () => ScrollTrigger.refresh());
+    document.fonts && document.fonts.ready.then(() => ScrollTrigger.refresh());
   </script>
 </body>
 
