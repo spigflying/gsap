@@ -160,18 +160,16 @@
     .ad.light .tick { stroke: #0B141B; opacity: .45; }
     .ad.light .block { fill: #0B141B; }
     .ad.light .bay-cell { stroke: #0094B3; filter: drop-shadow(0 0 3px rgba(0, 148, 179, .5)); }
-    .ad.light .fill { filter: drop-shadow(0 28px 64px rgba(0, 0, 0, .45)); }
+    .ad.light .fill { fill: transparent; filter: none; }
 
     .ad.light .ad__badge .no { color: #5B6B78; }
     .ad.light .ad__badge .dot { background: #0094B3; box-shadow: 0 0 8px rgba(0, 148, 179, .6); }
     .ad.light .ad__title .lead { color: #0A7C8F; text-shadow: none; }
 
-    .ad.light .ad__row { background: rgba(11, 20, 27, 0.035); border-color: rgba(11, 20, 27, 0.14); }
+    /* the three boxes: no fill, just a plain 1px line — no top accent / effects */
+    .ad.light .ad__row { background: none; border: 1px solid rgba(11, 20, 27, 0.22); }
     .ad.light .ad__row .meta { color: #5B6B78; }
     .ad.light .ad__row .copy { color: #0B141B; }
-    .ad.light .ad__row:nth-child(1) { border-top-color: #0A7C8F; }
-    .ad.light .ad__row:nth-child(2) { border-top-color: var(--signal); }
-    .ad.light .ad__row:nth-child(3) { border-top-color: #0B141B; }
     .ad.light .ad__row:nth-child(1) .sdot { background: #0A7C8F; box-shadow: 0 0 6px rgba(10, 124, 143, .6); }
     .ad.light .ad__row:nth-child(2) .sdot { background: var(--signal); box-shadow: 0 0 6px var(--signal); }
     .ad.light .ad__row:nth-child(3) .sdot { background: #0B141B; box-shadow: none; }
@@ -265,7 +263,7 @@
             M40 4 L960 4 L996 40 L996 150 L974 174 L974 202 L996 226 L996 480
             L960 516 L40 516 L4 480 L4 40 Z" />
           <g class="bay bay-top" data-x="606" data-y="3" data-w="352" data-h="18" data-n="18"></g>
-          <g class="bay bay-bot bay-fill" data-x="44" data-y="500" data-w="312" data-h="16" data-n="6"></g>
+          <g class="bay bay-bot bay-fill" data-x="44" data-y="500" data-w="312" data-h="16" data-n="9"></g>
           <path class="block" d="M858 498 L956 498 L972 516 L858 516 Z" />
         </svg>
 
