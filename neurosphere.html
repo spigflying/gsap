@@ -179,7 +179,7 @@
     /* white module: narrower by ~1/3, centered; its bottom-left bay fills when lit */
     .ad-stop.section-light { justify-content: center; }
     .ad-stop.section-light > .ad { max-width: 840px; }
-    .ad.light .bay-fill .bay-cell { fill: #0094B3; fill-opacity: 0; }
+    .ad.light .bay-fill .bay-cell { fill: #0094B3; fill-opacity: 0.25; stroke: none; }
 
     footer { padding: 80px 0 120px; text-align: center; color: var(--lo); }
     footer .big { font-family: var(--display); font-weight: 700; color: var(--hi); font-size: clamp(24px, 4vw, 40px); letter-spacing: -.02em; margin-bottom: 16px; }
@@ -229,14 +229,6 @@
             M40 4 L960 4 L996 40 L996 150 L974 174 L974 202 L996 226 L996 480
             L960 516 L40 516 L4 480 L4 40 Z" />
 
-          <!-- stepped bracket accent, top-left -->
-          <path class="bracket" d="M18 78 L18 30 L30 18 L96 18" />
-
-          <!-- short edge ticks, top-left -->
-          <line class="tick" x1="120" y1="4" x2="120" y2="16" />
-          <line class="tick" x1="150" y1="4" x2="150" y2="16" />
-          <line class="tick" x1="180" y1="4" x2="180" y2="16" />
-
           <!-- TOP-RIGHT diagonal-slash bay: hollow cells, runway-light chase -->
           <g class="bay bay-top" data-x="606" data-y="3" data-w="352" data-h="18" data-n="18"></g>
           <!-- BOTTOM-RIGHT diagonal-slash bay + solid block -->
@@ -272,12 +264,8 @@
           <path class="outline" d="
             M40 4 L960 4 L996 40 L996 150 L974 174 L974 202 L996 226 L996 480
             L960 516 L40 516 L4 480 L4 40 Z" />
-          <path class="bracket" d="M18 78 L18 30 L30 18 L96 18" />
-          <line class="tick" x1="120" y1="4" x2="120" y2="16" />
-          <line class="tick" x1="150" y1="4" x2="150" y2="16" />
-          <line class="tick" x1="180" y1="4" x2="180" y2="16" />
           <g class="bay bay-top" data-x="606" data-y="3" data-w="352" data-h="18" data-n="18"></g>
-          <g class="bay bay-bot bay-fill" data-x="44" data-y="500" data-w="312" data-h="16" data-n="16"></g>
+          <g class="bay bay-bot bay-fill" data-x="44" data-y="500" data-w="312" data-h="16" data-n="6"></g>
           <path class="block" d="M858 498 L956 498 L972 516 L858 516 Z" />
         </svg>
 
@@ -364,8 +352,6 @@
         const dot = ad.querySelector(".ad__badge .dot");
         const hud = ad.querySelector(".hud-path");
         const outline = ad.querySelector(".outline");
-        const bracket = ad.querySelector(".bracket");
-        const ticks = ad.querySelectorAll(".tick");
         const block = ad.querySelector(".block");
         const badge = ad.querySelector(".ad__badge");
         const title = ad.querySelector(".ad__title");
@@ -385,11 +371,9 @@
         const cellsBot = buildBay(botBayEl);
 
         // resting states — layout never moves; frame + text reveal on enter
-        gsap.set(bracket, { autoAlpha: 0 });
-        gsap.set(ticks, { autoAlpha: 0 });
         gsap.set(cellsTop, { opacity: 0.16 });
-        // a fill bay keeps its hollow outline always on; only the fill toggles
-        gsap.set(cellsBot, botFill ? { opacity: 1, fillOpacity: 0 } : { opacity: 0.16 });
+        // a fill bay is always solid; unlit = light & semi-transparent, lit = opaque
+        gsap.set(cellsBot, botFill ? { opacity: 1, fillOpacity: 0.25 } : { opacity: 0.16 });
         if (block) gsap.set(block, { autoAlpha: 0 });
         gsap.set(badge, { autoAlpha: 0, y: 12 });
         gsap.set(metas, { autoAlpha: 0 });
@@ -405,11 +389,10 @@
           trigger: ad, start: "top 80%", once: true,
           onEnter: () => {
             const tl = gsap.timeline();
-            tl.to(outline, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" })
-              .to(bracket, { autoAlpha: 1, duration: 0.4 }, "-=0.6")
-              .to(ticks, { autoAlpha: 1, duration: 0.3, stagger: 0.06 }, "-=0.4")
-              .to(block, { autoAlpha: 0.9, duration: 0.4 }, "-=0.3")
-              .to(badge, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, "-=0.3")
+            // outermost frame line draws in — slowed to half speed (1.1s → 2.2s)
+            tl.to(outline, { strokeDashoffset: 0, duration: 2.2, ease: "power2.inOut" })
+              .to(block, { autoAlpha: 0.9, duration: 0.4 }, "-=0.5")
+              .to(badge, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, "-=0.4")
               .to(metas, { autoAlpha: 1, duration: 0.3, stagger: 0.08 }, "-=0.1");
 
             if (isLight) {
@@ -426,8 +409,8 @@
             // runway lights / flowing data (half speed, half frequency, cells fixed)
             gsap.to(cellsTop, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "start" } });
             if (botFill) {
-              // fill bay: each cell fills solid when it lights, hollow otherwise
-              gsap.to(cellsBot, { keyframes: { fillOpacity: [0, 1, 0] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "start" } });
+              // fill bay: solid cells go from light/semi-transparent to fully opaque when lit
+              gsap.to(cellsBot, { keyframes: { fillOpacity: [0.25, 1, 0.25] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "start" } });
             } else {
               gsap.to(cellsBot, { keyframes: { opacity: [0.16, 1, 0.16] }, duration: 1.0, ease: "sine.inOut", repeat: -1, repeatDelay: 0.9, stagger: { each: 0.16, from: "end" } });
             }
@@ -439,7 +422,7 @@
 
     /* reduced motion: frame, bays + text simply shown, no looping animation */
     mm.add("(prefers-reduced-motion: reduce)", () => {
-      gsap.set(".outline, .bracket, .tick, .block", { autoAlpha: 1, clearProps: "strokeDasharray,strokeDashoffset" });
+      gsap.set(".outline, .block", { autoAlpha: 1, clearProps: "strokeDasharray,strokeDashoffset" });
       document.querySelectorAll(".bay").forEach(buildBay);
       gsap.set(".bay-cell", { opacity: 0.6 });
     });
