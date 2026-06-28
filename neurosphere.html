@@ -146,6 +146,28 @@
     .ad__row:nth-child(4) .sdot { background: var(--hi); box-shadow: 0 0 6px var(--hi); }
     .ad__row .copy { font-size: clamp(14px, 1.5vw, 16px); line-height: 1.6; color: var(--hi); }
 
+    /* ---------- light (white) variant of the same module ---------- */
+    .ad.light .outline { stroke: #0B141B; opacity: .92; filter: none; }
+    .ad.light .bracket { stroke: #0B141B; }
+    .ad.light .tick { stroke: #0B141B; opacity: .45; }
+    .ad.light .block { fill: #0B141B; }
+    .ad.light .bay-cell { stroke: #0094B3; filter: drop-shadow(0 0 3px rgba(0, 148, 179, .5)); }
+    .ad.light .fill { filter: drop-shadow(0 28px 64px rgba(0, 0, 0, .45)); }
+
+    .ad.light .ad__badge .no { color: #5B6B78; }
+    .ad.light .ad__badge .dot { background: #0094B3; box-shadow: 0 0 8px rgba(0, 148, 179, .6); }
+    .ad.light .ad__title .lead { color: #0A7C8F; text-shadow: none; }
+
+    .ad.light .ad__row { background: rgba(11, 20, 27, 0.035); border-color: rgba(11, 20, 27, 0.14); }
+    .ad.light .ad__row .meta { color: #5B6B78; }
+    .ad.light .ad__row .copy { color: #0B141B; }
+    .ad.light .ad__row:nth-child(1) { border-top-color: #0A7C8F; }
+    .ad.light .ad__row:nth-child(2) { border-top-color: var(--signal); }
+    .ad.light .ad__row:nth-child(3) { border-top-color: #0B141B; }
+    .ad.light .ad__row:nth-child(1) .sdot { background: #0A7C8F; box-shadow: 0 0 6px rgba(10, 124, 143, .6); }
+    .ad.light .ad__row:nth-child(2) .sdot { background: var(--signal); box-shadow: 0 0 6px var(--signal); }
+    .ad.light .ad__row:nth-child(3) .sdot { background: #0B141B; box-shadow: none; }
+
     footer { padding: 80px 0 120px; text-align: center; color: var(--lo); }
     footer .big { font-family: var(--display); font-weight: 700; color: var(--hi); font-size: clamp(24px, 4vw, 40px); letter-spacing: -.02em; margin-bottom: 16px; }
     footer .metaf { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; }
@@ -187,7 +209,7 @@
           </defs>
 
           <!-- the silhouette: fill + outline share the EXACT same path data -->
-          <path id="hud" class="fill" fill="url(#panelFill)" d="
+          <path class="fill hud-path" fill="url(#panelFill)" d="
             M40 4 L960 4 L996 40 L996 150 L974 174 L974 202 L996 226 L996 480
             L960 516 L40 516 L4 480 L4 40 Z" />
           <path class="outline" d="
@@ -203,14 +225,51 @@
           <line class="tick" x1="180" y1="4" x2="180" y2="16" />
 
           <!-- TOP-RIGHT diagonal-slash bay: hollow cells, runway-light chase -->
-          <g class="bay" id="bayTop" data-x="606" data-y="3" data-w="352" data-h="18" data-n="18"></g>
+          <g class="bay bay-top" data-x="606" data-y="3" data-w="352" data-h="18" data-n="18"></g>
           <!-- BOTTOM-RIGHT diagonal-slash bay + solid block -->
-          <g class="bay" id="bayBot" data-x="534" data-y="500" data-w="312" data-h="16" data-n="16"></g>
+          <g class="bay bay-bot" data-x="534" data-y="500" data-w="312" data-h="16" data-n="16"></g>
           <path class="block" d="M858 498 L956 498 L972 516 L858 516 Z" />
         </svg>
 
         <div class="ad__inner">
           <div class="ad__badge"><span class="no">MODULE 01</span> · NEUROSPHERE / 登入入口 <span class="dot"></span></div>
+          <h2 class="ad__title"><span class="lead">AI 導讀：進入神經介面，光環、星座、登入三步到位。</span></h2>
+          <div class="ad__rows">
+            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-01 · RING</div><div class="copy">同心 HUD 光環自我描繪，開機瞬間完成定位校準。</div></div>
+            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-02 · LINK</div><div class="copy">背景星座節點一條條接通，織出完整神經網路。</div></div>
+            <div class="ad__row"><div class="meta"><span class="sdot"></span>S-03 · KEY</div><div class="copy">掃描驗證通過後解鎖，正式進入神經介面層。</div></div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ 單一模組 · 白色版本 ============ -->
+    <section class="ad-stop">
+      <article class="ad light">
+        <svg class="frame" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="panelFillLight" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.98" />
+              <stop offset="1" stop-color="#E9EEF2" stop-opacity="0.98" />
+            </linearGradient>
+          </defs>
+          <path class="fill hud-path" fill="url(#panelFillLight)" d="
+            M40 4 L960 4 L996 40 L996 150 L974 174 L974 202 L996 226 L996 480
+            L960 516 L40 516 L4 480 L4 40 Z" />
+          <path class="outline" d="
+            M40 4 L960 4 L996 40 L996 150 L974 174 L974 202 L996 226 L996 480
+            L960 516 L40 516 L4 480 L4 40 Z" />
+          <path class="bracket" d="M18 78 L18 30 L30 18 L96 18" />
+          <line class="tick" x1="120" y1="4" x2="120" y2="16" />
+          <line class="tick" x1="150" y1="4" x2="150" y2="16" />
+          <line class="tick" x1="180" y1="4" x2="180" y2="16" />
+          <g class="bay bay-top" data-x="606" data-y="3" data-w="352" data-h="18" data-n="18"></g>
+          <g class="bay bay-bot" data-x="534" data-y="500" data-w="312" data-h="16" data-n="16"></g>
+          <path class="block" d="M858 498 L956 498 L972 516 L858 516 Z" />
+        </svg>
+
+        <div class="ad__inner">
+          <div class="ad__badge"><span class="no">MODULE 01</span> · NEUROSPHERE / 登入入口 · LIGHT <span class="dot"></span></div>
           <h2 class="ad__title"><span class="lead">AI 導讀：進入神經介面，光環、星座、登入三步到位。</span></h2>
           <div class="ad__rows">
             <div class="ad__row"><div class="meta"><span class="sdot"></span>S-01 · RING</div><div class="copy">同心 HUD 光環自我描繪，開機瞬間完成定位校準。</div></div>
@@ -266,7 +325,7 @@
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       document.querySelectorAll(".ad").forEach(ad => {
         const dot = ad.querySelector(".ad__badge .dot");
-        const hud = ad.querySelector("#hud");
+        const hud = ad.querySelector(".hud-path");
         const outline = ad.querySelector(".outline");
         const bracket = ad.querySelector(".bracket");
         const ticks = ad.querySelectorAll(".tick");
@@ -281,8 +340,8 @@
         gsap.set(outline, { strokeDasharray: L, strokeDashoffset: L });
 
         // build the two fixed diagonal-slash bays
-        const cellsTop = buildBay(ad.querySelector("#bayTop"));
-        const cellsBot = buildBay(ad.querySelector("#bayBot"));
+        const cellsTop = buildBay(ad.querySelector(".bay-top"));
+        const cellsBot = buildBay(ad.querySelector(".bay-bot"));
 
         // resting states — layout never moves; frame + text reveal on enter
         gsap.set(bracket, { autoAlpha: 0 });
