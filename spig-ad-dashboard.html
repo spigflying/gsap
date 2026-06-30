@@ -168,7 +168,46 @@
         });
       });
     }
-    function scheduleContentReveal() {}          // Task 6
+    // Matrix 風格解碼：每字先亂跳 kana/latin，再由左至右逐字鎖定（rAF 驅動）
+    const KATA = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲ";
+    const LAT = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&<>/*";
+    function rndGlyph(c) {
+      if (/\s/.test(c)) return c;
+      if (/[　-鿿＀-￯゠-ヿ]/.test(c)) return KATA[Math.random() * KATA.length | 0];
+      return LAT[Math.random() * LAT.length | 0];
+    }
+    function scrambleIn(el) {
+      const text = el.dataset.text || (el.dataset.text = el.textContent);
+      const chars = [...text], n = chars.length;
+      const dur = Math.min(1600, 50 * n + 350);
+      el.style.visibility = "visible"; el.style.opacity = "1";
+      const t0 = performance.now();
+      function tick(now) {
+        const v = Math.min(n, (now - t0) / dur * n);
+        let out = "";
+        for (let i = 0; i < n; i++) out += (i < v) ? chars[i] : rndGlyph(chars[i]);
+        el.textContent = out;
+        if (v < n) requestAnimationFrame(tick); else el.textContent = text;
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function scheduleContentReveal() {
+      const CONTENT_REVEAL = RUNWAY_IN + 350;
+      setTimeout(() => scrambleIn(root.querySelector(".ad__title .lead")), CONTENT_REVEAL);
+      const rows = [...root.querySelectorAll(".ad__row")];
+      const metas = root.querySelectorAll(".ad__row .meta");
+      const copies = root.querySelectorAll(".ad__row .copy");
+      rows.forEach((row, i) => {
+        const at = CONTENT_REVEAL + i * 160;
+        setTimeout(() => {
+          row.style.opacity = "1";
+          row.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, fill: "forwards" });
+          metas[i].style.opacity = "1";
+          scrambleIn(copies[i]);
+        }, at);
+      });
+    }
     function showStatic(frame, bayGroups) {}     // Task 7
 
     // ---- 進場時序常數（對應現版 neurosphere 的時間點）----
@@ -184,6 +223,8 @@
       });
       bayGroups.forEach(g => { g.el.style.opacity = "0"; });
       frame.querySelectorAll(".block").forEach(b => { b.style.opacity = "0"; });
+      root.querySelectorAll(".ad__title .lead, .ad__row, .ad__row .meta, .ad__row .copy")
+        .forEach(e => { e.style.opacity = "0"; });
     }
 
     // 進場：框線自繪 → 框線畫完跑道燈父層與色塊同時淡入 → 啟動循環 + 內容揭示
