@@ -152,8 +152,56 @@
       }));
     }
 
-    // 暫時：先建出格子以淡底顯示供驗證（Task 4 會整合進 boot）
-    collectBays(activeFrame());
+    // ---- 後續 task 實作；先以 stub 讓進場可獨立運作 ----
+    function startRunwayLoops(bayGroups) {}      // Task 5
+    function scheduleContentReveal() {}          // Task 6
+    function showStatic(frame, bayGroups) {}     // Task 7
+
+    // ---- 進場時序常數（對應現版 neurosphere 的時間點）----
+    const FRAME_DRAW = 2200;   // 框線自繪時長
+    const RUNWAY_IN = 2250;    // 框線畫完：跑道燈父層 + 色塊同時淡入
+
+    // 進場前：框線收起、跑道燈父層與色塊隱形
+    function prepIntro(frame, bayGroups) {
+      frame.querySelectorAll(".outline").forEach(o => {
+        const L = o.getTotalLength();
+        o.style.strokeDasharray = L;
+        o.style.strokeDashoffset = L;
+      });
+      bayGroups.forEach(g => { g.el.style.opacity = "0"; });
+      frame.querySelectorAll(".block").forEach(b => { b.style.opacity = "0"; });
+    }
+
+    // 進場：框線自繪 → 框線畫完跑道燈父層與色塊同時淡入 → 啟動循環 + 內容揭示
+    function playIntro(frame, bayGroups) {
+      frame.querySelectorAll(".outline").forEach(o => {
+        o.animate([{ strokeDashoffset: o.style.strokeDashoffset }, { strokeDashoffset: 0 }],
+          { duration: FRAME_DRAW, easing: "cubic-bezier(.45,0,.15,1)", fill: "forwards" });
+      });
+      frame.querySelectorAll(".block").forEach(b => {
+        b.animate([{ opacity: 0 }, { opacity: 0.9 }],
+          { delay: RUNWAY_IN, duration: 500, easing: "ease-out", fill: "forwards" });
+      });
+      bayGroups.forEach(g => {
+        g.el.animate([{ opacity: 0 }, { opacity: 1 }],
+          { delay: RUNWAY_IN, duration: 500, easing: "ease-out", fill: "forwards" });
+      });
+      setTimeout(() => startRunwayLoops(bayGroups), RUNWAY_IN);
+      scheduleContentReveal();
+    }
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    function boot() {
+      const frame = activeFrame();
+      const bayGroups = collectBays(frame);
+      if (reduce.matches) { showStatic(frame, bayGroups); return; }
+      prepIntro(frame, bayGroups);
+      const io = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) { io.disconnect(); playIntro(frame, bayGroups); }
+      }, { threshold: 0.2 });
+      io.observe(host);
+    }
+    boot();
   })();
   </script>
 </body>
