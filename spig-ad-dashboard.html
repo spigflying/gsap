@@ -153,7 +153,21 @@
     }
 
     // ---- 後續 task 實作；先以 stub 讓進場可獨立運作 ----
-    function startRunwayLoops(bayGroups) {}      // Task 5
+    // 跑道燈：每格各自一個無限動畫 → 沒有「整體 repeat reset」，淡底不消失；
+    // 逐格 delay 製造跑動感，keyframes 尾段維持低值模擬每輪停頓（WAAPI 無 repeatDelay）。
+    function startRunwayLoops(bayGroups) {
+      const CYCLE = 1900;   // 約 1.0s 脈衝 + 0.9s 停頓
+      bayGroups.forEach(group => {
+        const lo = group.fill ? 0.25 : 0.16;
+        const order = group.from === "end" ? [...group.cells].reverse() : group.cells;
+        order.forEach((cell, i) => {
+          const kf = group.fill
+            ? [{ fillOpacity: lo, offset: 0 }, { fillOpacity: 1, offset: 0.26 }, { fillOpacity: lo, offset: 0.53 }, { fillOpacity: lo, offset: 1 }]
+            : [{ opacity: lo, offset: 0 }, { opacity: 1, offset: 0.26 }, { opacity: lo, offset: 0.53 }, { opacity: lo, offset: 1 }];
+          cell.animate(kf, { duration: CYCLE, delay: i * 160, iterations: Infinity, easing: "ease-in-out" });
+        });
+      });
+    }
     function scheduleContentReveal() {}          // Task 6
     function showStatic(frame, bayGroups) {}     // Task 7
 
