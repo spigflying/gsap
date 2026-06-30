@@ -447,6 +447,7 @@
 
         // build the fixed diagonal-slash bays in every frame variant
         const bayGroups = [...ad.querySelectorAll(".bay")].map(bay => ({
+          el: bay,
           cells: buildBay(bay),
           fill: bay.classList.contains("bay-fill"),
           from: bay.classList.contains("bay-bot") ? "end" : "start"
@@ -454,8 +455,12 @@
 
         // resting states — layout never moves; frame + text reveal on enter
         bayGroups.forEach(group => {
-          gsap.set(group.cells, group.fill ? { opacity: 1, fillOpacity: 0 } : { opacity: 0 });
+          // 常駐淡色打底：底值設 0.16/0.25 而非 0，
+          // 讓格子在等待與循環 reset 期間保持微亮，不再整排消失重來。
+          gsap.set(group.cells, group.fill ? { opacity: 1, fillOpacity: 0.25 } : { opacity: 0.16 });
         });
+        // 父層 <g> 先隱形：框線畫完後才整排淡入「出現」，與循環(子層)分層、不搶屬性。
+        if (isDashboard) gsap.set(bayGroups.map(group => group.el), { opacity: 0 });
         if (blocks.length) gsap.set(blocks, { autoAlpha: 0 });
         gsap.set(metas, { autoAlpha: 0 });
         if (isDashboard) {
@@ -478,13 +483,11 @@
             tl.to(outlines, { strokeDashoffset: 0, duration: 2.2, ease: "power2.inOut" });
 
             if (isDashboard) {
-              const hollowCells = bayGroups.filter(group => !group.fill).flatMap(group => group.cells);
-              const fillCells = bayGroups.filter(group => group.fill).flatMap(group => group.cells);
               tl.addLabel("runwayIn", ">+0.05")
                 .add(() => startRunwayLoops(bayGroups), "runwayIn")
                 .to(blocks, { autoAlpha: 0.9, duration: 0.5, ease: "power2.out" }, "runwayIn")
-                .to(hollowCells, { opacity: 0.16, duration: 0.5, stagger: { each: 0.02, from: "start" }, ease: "sine.out" }, "runwayIn")
-                .to(fillCells, { fillOpacity: 0.25, duration: 0.5, stagger: { each: 0.03, from: "start" }, ease: "sine.out" }, "runwayIn")
+                // 跑道燈整排淡入「出現」：作用在父層 <g>，與色塊同時進入；循環在子層照跑、不搶屬性。
+                .to(bayGroups.map(group => group.el), { opacity: 1, duration: 0.5, ease: "power2.out" }, "runwayIn")
                 // 內容揭示與跑道燈進場重疊，消除框線/跑道燈與標題間的空窗期
                 .addLabel("contentReveal", "runwayIn+=0.35")
                 .add(scrambleIn(titleLead), "contentReveal");
