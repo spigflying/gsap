@@ -21,13 +21,101 @@
   <script>
   (function () {
     "use strict";
+
+    // ---- shadow 內的樣式：因 Shadow DOM 隔離，可自由用裸標籤；:host all:initial 切斷宿主繼承 ----
+    const CSS = `
+      :host { all: initial; display: block; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      .ad {
+        --dash: #0094B3;
+        --accent: #09151D;
+        --muted-line: rgba(9, 21, 29, 0.18);
+        --signal: #FF5C38;
+        --tc: "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+        --mono: ui-monospace, "SF Mono", Menlo, monospace;
+        position: relative;
+        width: 100%;
+        max-width: 1080px;
+        margin: 0 auto;
+        min-height: clamp(400px, 40vw, 460px);
+        padding: clamp(70px, 7vw, 96px) clamp(58px, 7vw, 92px) clamp(34px, 3vw, 46px);
+        font-family: var(--tc);
+        line-height: 1.6;
+        color: #0B141B;
+        background: #fff;
+      }
+
+      .frame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+      .frame-mobile { display: none; }
+      .outline { fill: none; stroke: var(--accent); stroke-width: 2.2; }
+      .fill { fill: transparent; }
+      .plate { fill: var(--accent); opacity: .96; }
+      .bay-cell { fill: none; stroke: var(--dash); stroke-width: 1.6; filter: drop-shadow(0 0 5px color-mix(in srgb, var(--dash) 70%, transparent)); opacity: 0.16; }
+      .bay-fill .bay-cell { fill: var(--dash); fill-opacity: 0.25; stroke: none; opacity: 1; }
+
+      .ad__inner { position: relative; z-index: 3; display: flex; flex-direction: column; justify-content: flex-start; }
+
+      .ad__title { font-family: var(--tc); font-weight: 700; font-size: clamp(21px, 2.9vw, 32px); line-height: 1.35; letter-spacing: -.01em; margin-bottom: 24px; max-width: 24ch; }
+      .ad__title .lead { color: var(--accent); display: block; max-width: 23ch; }
+
+      .ad__rows { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+      .ad__row { position: relative; min-width: 0; border: 1px solid var(--muted-line); border-radius: 7px; padding: 16px 18px 18px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7); background: none; }
+      .ad__row .meta { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; color: #5B6B78; }
+      .ad__row .sdot { width: 6px; height: 6px; border-radius: 50%; }
+      .ad__row:nth-child(1) .sdot { background: var(--dash); box-shadow: 0 0 8px color-mix(in srgb, var(--dash) 70%, transparent); }
+      .ad__row:nth-child(2) .sdot { background: var(--signal); box-shadow: 0 0 8px rgba(255, 92, 56, .45); }
+      .ad__row:nth-child(3) .sdot { background: var(--accent); box-shadow: none; }
+      .ad__row .copy { font-size: clamp(14px, 1.5vw, 16px); line-height: 1.6; color: #0B141B; }
+
+      @media (max-width: 760px) {
+        .ad { min-height: 700px; padding: 88px 54px 40px; }
+        .frame-desktop { display: none; }
+        .frame-mobile { display: block; }
+        .frame-mobile .outline { stroke-width: 1.35; vector-effect: non-scaling-stroke; }
+        .ad__title { font-size: clamp(20px, 5.4vw, 25px); max-width: 18ch; }
+        .ad__title .lead { max-width: 18ch; }
+        .ad__rows { grid-template-columns: 1fr; gap: 12px; }
+      }
+    `;
+
+    // ---- 廣告 HTML 結構（兩套 SVG frame + 三標題框）----
+    const HTML = `
+      <div class="ad">
+        <svg class="frame frame-desktop" viewBox="0 0 1000 540" preserveAspectRatio="none" aria-hidden="true">
+          <path class="fill hud-path" d="M56 52 L72 36 L268 36 L284 52 L444 52 L460 36 L911 36 L944 96 L944 216 L932 228 L932 314 L944 326 L944 466 L922 506 L704 506 L688 492 L506 492 L490 506 L78 506 L56 466 L56 52 Z" />
+          <path class="outline" d="M56 52 L72 36 L268 36 L284 52 L444 52 L460 36 L911 36 L944 96 L944 216 L932 228 L932 314 L944 326 L944 466 L922 506 L704 506 L688 492 L506 492 L490 506 L78 506 L56 466 L56 52 Z" />
+          <path class="plate block" d="M 59 54 L 74 40 L 266 40 L 280 54 Z" />
+          <path class="plate block" d="M 508 495 L 686 495 L 698 506 L 496 506 Z" />
+          <g class="bay bay-top" data-x="724" data-y="39" data-w="170" data-h="14" data-n="10" data-gap="1" data-skew="0.55" data-lean="left"></g>
+          <g class="bay bay-bot bay-fill" data-x="300" data-y="492" data-w="206" data-h="14" data-n="7" data-gap="0.5" data-skew="0.55" data-lean="right"></g>
+        </svg>
+        <svg class="frame frame-mobile" viewBox="0 0 420 900" preserveAspectRatio="none" aria-hidden="true">
+          <path class="fill hud-path" d="M30 54 L44 40 L184 40 L198 54 L360 54 L388 104 L388 270 L378 282 L378 390 L388 402 L388 798 L377 818 L256 818 L244 806 L120 806 L113 818 L41 818 L30 798 L30 54 Z" />
+          <path class="outline" d="M30 54 L44 40 L184 40 L198 54 L360 54 L388 104 L388 270 L378 282 L378 390 L388 402 L388 798 L377 818 L256 818 L244 806 L120 806 L113 818 L41 818 L30 798 L30 54 Z" />
+          <path class="plate block" d="M 32 53 L 44.5 41.5 L 183.5 41.5 L 196 53 Z" />
+          <path class="plate block" d="M 251 808 L 351 808 L 342 815 L 261 815 Z" />
+          <g class="bay bay-top" data-x="242" data-y="42" data-w="92" data-h="12" data-n="7" data-gap="0.5" data-skew="0.55" data-lean="left"></g>
+          <g class="bay bay-bot bay-fill" data-x="52" data-y="806" data-w="68" data-h="12" data-n="5" data-gap="0.5" data-skew="0.55" data-lean="right"></g>
+        </svg>
+        <div class="ad__inner">
+          <h2 class="ad__title"><span class="lead">太空儀表板：單一艙體外框，聚焦任務入口與三段訊號。</span></h2>
+          <div class="ad__rows">
+            <div class="ad__row"><div class="meta"><span class="sdot"></span>D-01 · FRAME</div><div class="copy">左上艙門切角與上緣跑道燈，讓視線先進入主控區。</div></div>
+            <div class="ad__row"><div class="meta"><span class="sdot"></span>D-02 · ROUTE</div><div class="copy">底部菱形格維持逐格發光，像導航跑道持續導引。</div></div>
+            <div class="ad__row"><div class="meta"><span class="sdot"></span>D-03 · LOCK</div><div class="copy">右下實心結構作為停靠端點，強化 dashboard 重量感。</div></div>
+          </div>
+        </div>
+      </div>
+    `;
+
     const slot = document.getElementById("spig-ad-slot");
     const host = document.createElement("div");
     host.className = "spig-ad-host";
     slot.appendChild(host);
     const root = host.attachShadow({ mode: "open" });
-    root.innerHTML = `<style></style><div class="ad"></div>`;
-    // 後續 task 會填入 style 與廣告結構
+    root.innerHTML = `<style>${CSS}</style>${HTML}`;
+    // 動畫於後續 task 加入
   })();
   </script>
 </body>
