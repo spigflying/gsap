@@ -208,7 +208,13 @@
         }, at);
       });
     }
-    function showStatic(frame, bayGroups) {}     // Task 7
+    // 減少動態：不跑任何動畫，直接靜態完整顯示
+    function showStatic(frame, bayGroups) {
+      frame.querySelectorAll(".outline, .block").forEach(e => { e.style.opacity = ""; });
+      bayGroups.forEach(g => { g.el.style.opacity = "1"; g.cells.forEach(c => { c.style.opacity = "0.6"; }); });
+      root.querySelectorAll(".ad__title .lead, .ad__row, .ad__row .meta, .ad__row .copy")
+        .forEach(e => { e.style.opacity = "1"; e.style.visibility = "visible"; });
+    }
 
     // ---- 進場時序常數（對應現版 neurosphere 的時間點）----
     const FRAME_DRAW = 2200;   // 框線自繪時長
