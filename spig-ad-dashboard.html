@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spig-ad-dashboard · inline embed preview</title>
+  <style>
+    /* 僅供預覽：模擬宿主文章頁，故意放會污染的規則來驗證 Shadow DOM 隔離 */
+    body { font-family: Georgia, serif; max-width: 720px; margin: 0 auto; padding: 40px 20px; color: #222; }
+    * { box-sizing: content-box; }              /* 宿主的危險全域，廣告不該被影響 */
+    img { max-width: 100%; }
+    h2 { color: crimson; }                       /* 若滲進 shadow，標題會變紅 → 用來抓洩漏 */
+  </style>
+</head>
+<body>
+  <h1>模擬文章標題</h1>
+  <p>這是一段假文章內文，用來模擬廣告被 inline 注入文章頁的情境。下面是注入點。</p>
+  <div id="spig-ad-slot"></div>
+  <p>廣告之後還有更多文章內文，確認廣告樣式沒有外洩影響到這裡。</p>
+
+  <script>
+  (function () {
+    "use strict";
+    const slot = document.getElementById("spig-ad-slot");
+    const host = document.createElement("div");
+    host.className = "spig-ad-host";
+    slot.appendChild(host);
+    const root = host.attachShadow({ mode: "open" });
+    root.innerHTML = `<style></style><div class="ad"></div>`;
+    // 後續 task 會填入 style 與廣告結構
+  })();
+  </script>
+</body>
+</html>
