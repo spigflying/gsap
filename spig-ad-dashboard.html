@@ -115,7 +115,45 @@
     slot.appendChild(host);
     const root = host.attachShadow({ mode: "open" });
     root.innerHTML = `<style>${CSS}</style>${HTML}`;
-    // 動畫於後續 task 加入
+
+    // ---- 建斜切格子：固定一排，位置不動（原生，照搬 neurosphere）----
+    const SVGNS = "http://www.w3.org/2000/svg";
+    function buildBay(g) {
+      const x0 = +g.dataset.x, y0 = +g.dataset.y, w = +g.dataset.w, h = +g.dataset.h, n = +g.dataset.n;
+      const gap = +(g.dataset.gap || 5), cw = (w - gap * (n - 1)) / n, skew = h * +(g.dataset.skew || 0.95);
+      const cells = [];
+      for (let i = 0; i < n; i++) {
+        const x = x0 + i * (cw + gap);
+        const p = document.createElementNS(SVGNS, "path");
+        const leansLeft = g.dataset.lean === "left";
+        const d = leansLeft
+          ? "M" + x.toFixed(1) + " " + y0 + " L" + (x + cw - skew).toFixed(1) + " " + y0 +
+            " L" + (x + cw).toFixed(1) + " " + (y0 + h) + " L" + (x + skew).toFixed(1) + " " + (y0 + h) + " Z"
+          : "M" + (x + skew).toFixed(1) + " " + y0 + " L" + (x + cw).toFixed(1) + " " + y0 +
+            " L" + (x + cw - skew).toFixed(1) + " " + (y0 + h) + " L" + x.toFixed(1) + " " + (y0 + h) + " Z";
+        p.setAttribute("d", d);
+        p.setAttribute("class", "bay-cell");
+        g.appendChild(p); cells.push(p);
+      }
+      return cells;
+    }
+
+    // ---- 依當下斷點選用的 frame，建出該 frame 的 bay groups ----
+    const mq = window.matchMedia("(max-width: 760px)");
+    function activeFrame() {
+      return root.querySelector(mq.matches ? ".frame-mobile" : ".frame-desktop");
+    }
+    function collectBays(frame) {
+      return [...frame.querySelectorAll(".bay")].map(bay => ({
+        el: bay,
+        cells: buildBay(bay),
+        fill: bay.classList.contains("bay-fill"),
+        from: bay.classList.contains("bay-bot") ? "end" : "start"
+      }));
+    }
+
+    // 暫時：先建出格子以淡底顯示供驗證（Task 4 會整合進 boot）
+    collectBays(activeFrame());
   })();
   </script>
 </body>
