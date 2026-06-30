@@ -5,18 +5,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spig-ad-dashboard · inline embed preview</title>
   <style>
-    /* 僅供預覽：模擬宿主文章頁，故意放會污染的規則來驗證 Shadow DOM 隔離 */
-    body { font-family: Georgia, serif; max-width: 920px; margin: 0 auto; padding: 40px 20px; color: #222; }
+    /* 僅供預覽：模擬三立新聞網風格的宿主文章頁；故意保留會污染的規則來驗證 Shadow DOM 隔離 */
+    :root { --setn-red: #D6001C; }
     * { box-sizing: content-box; }              /* 宿主的危險全域，廣告不該被影響 */
     img { max-width: 100%; }
-    h2 { color: crimson; }                       /* 若滲進 shadow，標題會變紅 → 用來抓洩漏 */
+    h2 { color: crimson; }                       /* 若滲進 shadow，廣告標題會變紅 → 用來抓洩漏 */
+    body { font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; margin: 0; color: #222; background: #f4f4f4; }
+
+    .site-nav { background: #1a1a1a; }
+    .site-nav__bar { max-width: 1000px; margin: 0 auto; display: flex; align-items: center; gap: 18px; padding: 10px 16px; flex-wrap: wrap; }
+    .site-logo { background: var(--setn-red); color: #fff; font-weight: 800; padding: 6px 11px; border-radius: 3px; font-size: 18px; letter-spacing: 1px; }
+    .site-menu { display: flex; gap: 15px; flex-wrap: wrap; font-size: 14px; }
+    .site-menu span { color: #ccc; }
+    .site-menu .on { color: #fff; font-weight: 700; border-bottom: 2px solid var(--setn-red); padding-bottom: 2px; }
+
+    .page { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 32px; padding: 24px 20px; }
+    @media (max-width: 900px) { .page { grid-template-columns: 1fr; } .aside { display: none; } }
+
+    .article { background: #fff; padding: 30px 32px; }
+    .article h1 { font-size: clamp(24px, 3.4vw, 32px); line-height: 1.45; margin: 0 0 14px; color: #1a1a1a; font-weight: 800; }
+    .byline { font-size: 13px; color: #999; border-bottom: 1px solid #eee; padding-bottom: 14px; margin-bottom: 22px; }
+    .byline b { color: var(--setn-red); font-weight: 600; }
+    .article p { font-size: 17px; line-height: 1.95; margin: 0 0 20px; color: #333; }
+    .ph { background: #e3e3e3; color: #999; display: flex; align-items: center; justify-content: center; font-size: 13px; aspect-ratio: 16 / 10; }
+    .ph-cap { font-size: 12px; color: #999; margin: 8px 0 24px; }
+
+    .ad-wrap { margin: 28px 0; }
+    .ad-label { font-size: 11px; color: #bbb; letter-spacing: 2px; text-align: center; margin-bottom: 8px; }
+
+    .tags { margin: 28px 0 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .tags span { font-size: 13px; color: #555; background: #f0f0f0; padding: 5px 12px; border-radius: 3px; }
+    .share { display: flex; gap: 10px; margin: 18px 0; }
+    .share span { flex: 1; text-align: center; padding: 11px; color: #fff; font-size: 14px; border-radius: 3px; }
+
+    .aside h3 { font-size: 16px; color: #1a1a1a; border-left: 4px solid var(--setn-red); padding-left: 9px; margin: 0 0 16px; }
+    .rel { display: flex; gap: 10px; margin-bottom: 16px; }
+    .rel .thumb { width: 100px; height: 66px; background: #ddd; flex: none; }
+    .rel .t { font-size: 14px; line-height: 1.55; color: #333; }
   </style>
 </head>
 <body>
-  <h1>模擬文章標題</h1>
-  <p>這是一段假文章內文，用來模擬廣告被 inline 注入文章頁的情境。下面是注入點。</p>
-  <div id="spig-ad-slot"></div>
-  <p>廣告之後還有更多文章內文，確認廣告樣式沒有外洩影響到這裡。</p>
+  <nav class="site-nav">
+    <div class="site-nav__bar">
+      <span class="site-logo">三立新聞網</span>
+      <nav class="site-menu">
+        <span>即時</span><span>熱門</span><span>熱搜</span><span class="on">星聞</span><span>綜藝</span><span>戲劇</span><span>日韓</span><span>電影</span><span>音樂</span>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="page">
+    <main class="article">
+      <h1>昔流落貧民窟枯瘦如柴！女星證實「死於愛滋病」　打臉男友說法</h1>
+      <div class="byline">娛樂中心／蔡佩伶報導　·　<b>2026/06/30 14:50</b></div>
+
+      <p>曾為迪士尼動畫《星際寶貝》獻聲的女配音員黛薇雀絲（Daveigh Chase），於本月 16 日驚傳辭世。她的男友最初對外宣稱死因為敗血症，然而最新公布的官方驗屍報告，卻揭露了截然不同的真相。</p>
+
+      <div class="ph">示意圖（實際投放頁為新聞照片）</div>
+      <div class="ph-cap">▲女星近年流落洛杉磯街頭，身形枯瘦憔悴。（示意圖／資料照）</div>
+
+      <p>根據驗屍報告，她的真正死因為愛滋病，同時伴隨長期物質濫用問題，與男友先前的說法明顯不符，也讓外界一片譁然。曾經在大銀幕上嶄露頭角的童星，晚景竟如此淒涼。</p>
+
+      <p>社群上流傳的影片畫面顯示，她生前曾棲身於洛杉磯知名的貧民窟「Skid Row」，枯瘦如柴的身影令許多影迷鼻酸不捨。</p>
+
+      <div class="ad-wrap">
+        <div class="ad-label">— 廣告 ADVERTISEMENT —</div>
+        <div id="spig-ad-slot"></div>
+      </div>
+
+      <p>消息曝光後迅速引發討論，不少網友湧入她的社群帳號留言悼念，也有人呼籲社會應正視藝人退場後的身心與經濟困境。</p>
+
+      <p>對於外界的種種揣測，其家屬目前尚未進一步對外回應，相關後事安排也仍在低調進行中。</p>
+
+      <div class="tags">
+        <span>#黛薇雀絲</span><span>#愛滋病</span><span>#死因</span><span>#腦膜炎</span><span>#貧民窟</span>
+      </div>
+      <div class="share">
+        <span style="background:#3b5998">分享 Facebook</span>
+        <span style="background:#1da1f2">分享 Twitter</span>
+        <span style="background:#888">留言</span>
+      </div>
+    </main>
+
+    <aside class="aside">
+      <h3>熱門新聞</h3>
+      <div class="rel"><div class="thumb"></div><div class="t">經紀人證實死訊　粉絲湧入社群悲痛留言</div></div>
+      <div class="rel"><div class="thumb"></div><div class="t">昔日童星今何在？盤點那些消失在螢光幕的臉孔</div></div>
+      <div class="rel"><div class="thumb"></div><div class="t">驗屍報告全曝光　專家：物質濫用是隱形殺手</div></div>
+      <div class="rel"><div class="thumb"></div><div class="t">男友說法前後矛盾　網友揪出 3 大疑點</div></div>
+      <h3 style="margin-top:24px">大數據推薦</h3>
+      <div class="rel"><div class="thumb"></div><div class="t">獨家／知情人士爆料事件始末</div></div>
+      <div class="rel"><div class="thumb"></div><div class="t">她最後公開影像曝光　憔悴模樣令人心疼</div></div>
+    </aside>
+  </div>
 
   <script>
   (function () {
@@ -256,9 +337,18 @@
       const bayGroups = collectBays(frame);
       if (reduce.matches) { showStatic(frame, bayGroups); return; }
       prepIntro(frame, bayGroups);
+      // 看到「整個模組」才開始：模組比視窗矮 → 等完全進入(ratio≈1)；模組比視窗高 → 等它填滿視窗
       const io = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) { io.disconnect(); playIntro(frame, bayGroups); }
-      }, { threshold: 0.2 });
+        const e = entries[0];
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        const r = e.boundingClientRect;
+        const fullyVisible = e.intersectionRatio >= 0.99;
+        const fillsViewport = r.top <= 0 && r.bottom >= vh;
+        if (e.isIntersecting && (fullyVisible || fillsViewport)) {
+          io.disconnect();
+          playIntro(frame, bayGroups);
+        }
+      }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
       io.observe(host);
     }
     boot();
